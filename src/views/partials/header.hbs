@@ -1,0 +1,147 @@
+<div class="container-fluid">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light justify-content-between p-2">
+        <a class="navbar-brand" href="#">LOGO</a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+            <ul class="nav nav-tabs nav-fill">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">DASHBOARD</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#">TERMOHIGROMETRA NET</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#">CONTROL DE PRODUCCION RFID</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#">BUS DE CAMPO</a>
+                </li>                
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="mnuInstalaciones" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        INSTALACIONES
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="mnuInstalaciones">
+                        <a class="dropdown-item" href="/instalaciones/equipos">Equipos</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/instalaciones/infraestructuras">Infraestructuras</a>
+                    </div>
+                </li>
+            </ul>
+
+            <div>
+                {{#if user}}
+                <div class="dropdown ml-auto">
+                    <button class="btn btn-block btn-secondary dropdown-toggle" type="button" id="dropdownLogin" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-fw fa-user-circle"> </i>
+                        {{user.email}}
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-fill" aria-labelledby="dropdownLogin">
+                        <button class="btn btn-block dropdown-item" type="button">Action</button>
+                        <button class="btn btn-block dropdown-item" type="button">Another action</button>
+                        <div class="dropdown-divider"></div>
+                        <a class="btn btn-block dropdown-item" href="/logout"><i class="fa fa-sign-out" aria-hidden="true"></i>Cerrar Sesión</a>
+                    </div>
+                </div>
+                {{else}}
+                <div class="text-center">	
+                    <!--a href="#modalLogin" class="btn btn-block btn-secondary" data-toggle="modal">Iniciar Sesión</a-->
+                </div>
+                {{/if}}
+            </div>
+        </div>
+    </nav>
+    {{!--
+    <ol class="breadcrumb mb-2 px-2 py-0">
+        <li class="breadcrumb-item active">
+            <ul class="list-inline">
+                <li class="list-inline-item">ALMACEN DE MATERIA PRIMA ANEXO EL ALTO</li>
+                <li class="list-inline-item">/</li>
+                <li class="list-inline-item">ALMACEN QUICK PICK</li>
+            </ul>
+        </li>
+    </ol>
+    <div class="row my-2">
+        <form class="form-inline col-md-4 col-lg-5 col-xl-5 px-3">
+            <div class="input-group col-sm-12 px-0">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">
+                        <i class="fa fa-fw fa-map"></i>
+                    </div>
+                </div>
+                <select id="inputState" class="form-control">
+                    <option selected>Solidos No Estériles</option>
+                    <option>Líquidos Esteriles</option>
+                </select>
+            </div>
+        </form>
+        <form class="form-inline col-md-4 col-lg-4 col-xl-5 px-3">
+            <div class="input-group col-sm-12 px-0">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">
+                        <i class="fa fa-fw fa-location-arrow "></i>
+                    </div>
+                </div>
+                <select id="inputState" class="form-control">
+                    <option selected>Envasado</option>
+                    <option>Preparado</option>
+                </select>
+            </div>
+        </form>
+
+        <form class="form-inline col-md-4 col-lg-3 col-xl-2 px-3">
+            <div class="input-group col-sm-12 px-0">
+
+                <div class="input-group-prepend">
+                    <div class="input-group-text">
+                        <i class="fa fa-fw fa-calendar "></i>
+                    </div>
+                </div>
+                <input type="text" class="form-control" id="datepicker">
+            </div>
+        </form>
+    </div>
+    --}}
+    <!--div class="row">
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-primary text-white mb-4">
+                    <div class="card-body">Primary Card</div>
+                    <div class="card-footer d-flex align-items-center justify-content-between">
+                        <a class="small text-white stretched-link" href="#">View Details</a>
+                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-warning text-white mb-4">
+                    <div class="card-body">Warning Card</div>
+                    <div class="card-footer d-flex align-items-center justify-content-between">
+                        <a class="small text-white stretched-link" href="#">View Details</a>
+                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-success text-white mb-4">
+                    <div class="card-body">Success Card</div>
+                    <div class="card-footer d-flex align-items-center justify-content-between">
+                        <a class="small text-white stretched-link" href="#">View Details</a>
+                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-danger text-white mb-4">
+                    <div class="card-body">Danger Card</div>
+                    <div class="card-footer d-flex align-items-center justify-content-between">
+                        <a class="small text-white stretched-link" href="#">View Details</a>
+                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div-->
+</div>

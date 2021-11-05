@@ -1,0 +1,166 @@
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+    function responseHandler(res) {
+        $.each(res.rows, function (i, row) {
+            row.state = $.inArray(row.id, selections) !== -1
+        })
+        return res
+    }
+</script>
+
+
+<div id="toolbar">
+    <a id="add-Equipo" class="btn btn-outline-success" href="{{links.path}}{{links.add}}">
+        <i class="fa fa-fw fa-plus-circle"></i> Agregar Nuevo Equipo
+    </a>
+</div>
+<div class="container-fluid">
+    <table class="table table-condensed" {{!--class="table w-auto small" --}} {{!--class="table w-auto text-small" --}} 
+        id="table"
+        data-toggle="table"
+        data-locale="es-ES"
+        {{!--data-url="json/data1.json" --}}
+        data-toolbar="#toolbar"
+        data-search="true"
+        data-advanced-search="true"
+        data-show-refresh="true"
+        data-show-toggle="true"
+        data-show-fullscreen="true"
+        data-show-columns="true"
+        data-show-columns-toggle-all="true"
+        data-detail-view="true"
+        data-detail-formatter="detailFormatter"
+        data-show-export="true"
+        data-click-to-select="true"        
+        data-sortable="true"
+        data-minimum-count-columns="2"
+        data-show-pagination-switch="true"
+        data-pagination="true"
+        data-id-field="id"
+        data-page-list="[5, 10, 15, 20, all]"
+        data-show-footer="false"
+        {{!--data-side-pagination="server"--}}
+        data-response-handler="responseHandler">
+
+        <thead>
+            <tr>
+                <th data-field="planta" data-sortable="true">Planta</th>
+                <th data-field="area" data-sortable="true">Area</th>
+                <th data-field="numero" data-sortable=" true">Numero</th>
+                <th data-field="gmp">GMP</th>
+                <th data-field="clase" data-sortable="true">Clase</th>
+                <th data-field="objeto">Objeto</th>
+                <th data-field="modulo" data-sortable="true" >Modulo</th>
+                <th data-field="elemento">Elemento</th>
+                <th data-field="caracteristicas">Características</th>
+                <th data-field="calibracion" data-sortable="true">Calibración</th>
+                <th data-field="ubicacion">Ubicación</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {{#each instalaciones.equipos}}
+            <tr>
+                <td>{{Planta}}</td>
+                <td>{{Area}}</td>
+                <td style="white-space: nowrap;">{{Numero}}</td>
+                <td>{{GMP}}</td>
+                <td>{{Clase}}</td>
+                <td>{{Objeto}}</td>
+                <td>{{Modulo}}</td>
+                <td>{{Elemento}}</td>
+                <td>{{Caracteristicas}}</td>
+                <td>{{Calibracion}}</td>
+                <td style="white-space: nowrap;">{{Ubicacion}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
+<div id="dialog"></div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script>
+    var $table = $('#table')
+    var $remove = $('#remove')
+    var selections = []
+
+    function editar(id) {
+        console.log(id);
+    };
+
+    function eliminar(id) {
+        console.log(id);
+        $("#dialog").dialog({
+            resizable: false,
+            height: "auto",
+            width: 400,
+            modal: true,
+            title: "Eliminar Equipo",
+            buttons: {
+                "Si": function () {
+                    $.post('{{links.path}}{{links.delete}}', // url
+                        { 'id': id } // data to be submit
+                    ).done(function (data) {
+                        window.location.href = '{{links.path}}';
+                    }).fail(function () {
+                        alert('Ocurrio un error');
+                        $("#dialog").dialog("close");
+                    });;
+                },
+                "No": function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+        $("#dialog").html(
+            '<p><span class="fa fa-2x fa-question-circle" style="float:left; margin:12px 12px 20px 0;"></span>Los datos del equipo se eliminaran.<br>Desea eliminar equipo? </p>'
+        );
+        $("#dialog").dialog("open");
+    };
+
+    function detailFormatter(index, row) {
+        var html = []
+        var indexs = 0
+        var id = 0, code = "";
+        const zeroPad = (num, places) => String(num).padStart(places, '0');
+        $.each(row, function (key, value) {
+            var columns = $("th:eq(" + (indexs + 1) + ")").data("field")
+            if (columns != undefined) {
+                if (columns == 'area') {
+                    code += (row[columns] + " ");
+                }
+                if (columns == 'numero') {
+                    id = parseInt(row[columns].replace(' ', ''), 10);
+                    if (id % 1000 == 0) {
+                        code += zeroPad(id / 1000, 3);
+                    }
+                    else
+                        code += (id);
+                }
+                indexs++;
+            }
+            
+        });
+
+        html.push([
+            '<form  class="form-inline" onsubmit="return false;">',
+                '<label class="form-control" for="code">Código</label>',
+                '<input class="form-control text-center" type="text" id="code" name="code" disabled value="' + code + '">',
+
+                '<a class="form-control btn btn-outline-info mx-1" href="{{links.path}}{{links.edit}}?id=' + id + '">',
+                    '<i class="fa fa-fw fa-edit"></i>',
+                    'Editar',
+                '</a>',
+                '<button class="form-control btn btn-outline-danger mx-1" onClick="eliminar(' + id + ')">',
+                    '<i class="fa fa-fw fa-trash"></i>',
+                    'Eliminar',
+                '</button>',
+            '</form>'
+        ].join('')
+        );
+        return html.join('')
+    }
+
+</script>

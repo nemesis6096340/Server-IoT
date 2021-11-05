@@ -1,0 +1,25 @@
+<ol class="breadcrumb">
+  <li class="breadcrumb-item"><a href="../infraestructuras">Infraestructuras</a></li>
+  <li class="breadcrumb-item"><a href="../infraestructuras/plantas">Plantas</a></li>
+  <li class="breadcrumb-item"><a href="../infraestructuras/plantas/areas">Areas</a></li>
+  <li class="breadcrumb-item active">{{area}}</li>
+</ol>
+
+
+<div class="container-fluid">
+    <div class="card-deck m-4">
+        {{#each locations}}
+        <div class="card my-2" style="min-width: 18rem; max-width: 20rem;">
+            <!--div class="card-header">{{detalle}}</div-->
+            <div class="card-body">
+                <h3 class="card-title text-muted">{{codigo}}</h3>
+                <h4 class="card-subtitle mb-2">{{detalle}}</h4>
+                <h6 class="text-left text-muted">Tipo de ambiente: </h6>
+                <h6 class="text-center">{{ambiente}}</h6>
+                <h6 class="text-left text-muted">Piso o nivel: </h6>
+                <h6 class="text-center">{{pisonivel}}</h6>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+</div>

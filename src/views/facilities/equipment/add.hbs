@@ -1,0 +1,326 @@
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+    var equipo = {
+        id: 0,
+        objeto: "",
+        elemento: "",
+        caracteristicas: "",
+        gmp: false,
+        calibracion: 0,
+        ubicacion: 0,
+        tipo: 0,
+    };
+
+    var instalaciones = {};
+    instalaciones.clase = {{{ json facilities.class }}};
+    instalaciones.modulo = {{{ json facilities.module }}};
+    instalaciones.planta = {{{ json facilities.plant }}};
+    instalaciones.area = {{{ json facilities.area }}};
+    instalaciones.ubicacion = {{{ json facilities.location }}};
+    instalaciones.equipo = {{{ json facilities.equipment }}};
+    instalaciones.tipo = {{{ json facilities.type }}}
+
+    // Obtiene el equipo mas actual
+    if (equipo.id == 0) {
+        equipo.id = Math.max.apply(Math, instalaciones.equipo.map(function (o) { return o.id; })) + 1000;
+    }
+
+    function checkClassification() {
+        equipo.id = parseInt($("#id").val(), 10);
+        $('#clase').val(getClase(equipo.id / 1000));
+        $('#modulo').val(getModulo(equipo.id % 1000));
+    };
+
+    function getClase(numero) {
+        for (let i = 0; i < instalaciones.clase.length; i++) {
+            if (numero >= instalaciones.clase[i].desde && numero <= instalaciones.clase[i].hasta) {
+                return instalaciones.clase[i].detalle;
+            }
+        }
+        return 'No Tiene Clasificacion Primaria';
+    };
+
+    function getModulo(numero) {
+        for (let i = 0; i < instalaciones.modulo.length; i++) {
+            if (numero >= instalaciones.modulo[i].desde && numero <= instalaciones.modulo[i].hasta) {
+                return instalaciones.modulo[i].detalle;
+            }
+        }
+        return 'No Tiene Clasificacion Secundaria';
+    };
+
+    function loadPlanta() {
+        $("#planta").empty();
+        for (let i = 0; i < instalaciones.planta.length; i++) {
+            $("#planta").append('<option value=' + i + '>' + instalaciones.planta[i].detalle + '</option>');
+        }
+        loadArea(0);
+    };
+
+    function loadArea(index) {
+        $("#area").empty();
+        for (let i = 0; i < instalaciones.area.length; i++) {
+            if (instalaciones.area[i].planta == instalaciones.planta[index].codigo) {
+                $("#area").append('<option value=' + i + '>' + instalaciones.area[i].detalle + '</option>');
+            }
+        }
+        loadUbicacion(0);
+    };
+
+    function loadUbicacion(index) {
+        $("#ubicacion").empty();
+        for (let i = 0; i < instalaciones.ubicacion.length; i++) {
+            if (instalaciones.ubicacion[i].area == instalaciones.area[index].codigo) {
+                $("#ubicacion").append('<option value=' + i + '>' + instalaciones.ubicacion[i].detalle + '</option>');
+            }
+        }
+    }
+
+    function init() {
+        $("#id").val(equipo.id);
+        $("#gmp").val(equipo.gmp);
+        $("#calibracion").val(equipo.calibracion);
+        checkClassification();
+        $("#objeto").val(equipo.objeto);
+        $("#elemento").val("");
+        $("#caracteristicas").val("");
+        loadPlanta();
+    };
+
+    $(function () {
+        init();
+
+        $('#gmp').change(function () {
+            equipo.gmp = $(this).is(":checked");
+        });
+
+        $("#cancelar").click(function () {
+            
+            equipo.calibracion = parseInt($("#calibracion").val(), 10);
+            $("#dialog").dialog({
+                resizable: false,
+                height: "auto",
+                width: 400,
+                modal: true,
+                title: "Confirmar",
+                buttons: {
+                    "Si": function () {
+                        location.href = '/instalaciones/equipos'                        
+                    },
+                    "No": function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+            $("#dialog").html(
+                '<p><span class="fa fa-2x fa-question-circle" style="float:left; margin:12px 12px 20px 0;"></span>Si Cancela, los datos del equipo no se guardaran. Desea salir del editor? </p>'
+            );
+            $("#dialog").dialog("open");
+        });
+
+        $("#guardar").click(function () {
+            equipo.calibracion = parseInt($("#calibracion").val(), 10);
+            $("#dialog").dialog({
+                resizable: false,
+                height: "auto",
+                width: 400,
+                modal: true,
+                title: "Guardar Equipo",
+                buttons: {
+                    "Guardar Cambios": function () {
+                        console.log(equipo);
+                        $.post('/instalaciones/equipos/guardar',   // url
+                            { equipo }, // data to be submit
+                            function (data, status) {// success callback
+                                if(data.redirect){
+                                    window.location.href = data.redirect;
+                                }
+                                console.log('status: ' + status + ', data: ' + data);
+                            }, "json");
+                        $(this).dialog("close");
+                    },
+                    "Cancelar": function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+            $("#dialog").html(
+                '<p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Desea guardar los datos del equipo?</p>'
+            );
+            $("#dialog").dialog("open");
+        });
+
+        $("#objeto").on('change', function (event) {
+            equipo.objeto = $("#objeto").val();
+        });
+        $("#elemento").on('change', function (event) {
+            equipo.elemento = $("#elemento").val();
+        });
+        $("#caracteristicas").on('change', function (event) {
+            equipo.caracteristicas = $("#caracteristicas").val();
+        });
+        $("#planta").on('change', function (event) {
+            loadArea(event.target.value);
+        });
+        $("#area").on('change', function (event) {
+            loadUbicacion(event.target.value);
+        });
+        $("#ubicacion").on('change', function (event) {
+            equipo.ubicacion = parseInt(event.target.value);
+        });
+        $("#dialog").dialog({
+            autoOpen: false,
+            show: {
+                effect: "slide",
+                duration: 500
+            },
+            hide: {
+                effect: "blind",
+                duration: 500
+            }
+        });
+    });
+
+
+</script>
+
+<div id="dialog"></div>
+
+<div class="container">
+    <div class="card border-success my-2">
+        <div class="card-header bg-success text-light text-center">
+            AGREGAR NUEVO EQUIPO
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="form-group col-8 col-sm-6 col-md-6 col-lg-3 mb-1">
+                    <label class="sr-only" for="id">ID del equipo</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">ID</div>
+                        </div>
+                        <input type="number" class="form-control text-center" id="id" step=1000 min="1000" max="9999999" placeholder="Ingrese el ID del equipo" value=1000 onchange="checkClassification()">
+                    </div>
+                </div>
+                <div class="form-group col-2 col-sm-4 col-md-1 mb-1">
+                    <div class="input-group my-2 ml-4">
+                        <input class="form-check-input" type="checkbox" value="" id="gmp" aria-describedby="gmpHelp">
+                        <label class="form-check-label" for="gmp"> GMP </label>
+                    </div>
+                </div>
+                <div class="form-group col-sm-12 col-md-6  col-lg-4 mb-1">
+                    <label class="sr-only" for="calibracion">Tipo de Calibración</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text px-1">Calibración</div>
+                        </div>
+                        <select id="calibracion" class="form-control">
+                            {{#each facilities.calibration}}
+                            <option value={{id}}>{{detalle}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group col-sm-12 col-md-6  col-lg-4 mb-1">
+                    <label class="sr-only" for="tipo">Tipo de Equipo</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text px-1">Tipo</div>
+                        </div>
+                        <select id="tipo" class="form-control">
+                            {{#each facilities.type}}
+                            <option value={{id}}>{{detalle}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-6">
+                    <label class="sr-only" for="clase">Clasificación Primaria</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">Clase</div>
+                        </div>
+                        <input type="text" class="form-control" id="clase" value="" readonly>
+                    </div>
+                </div>
+                <div class="form-group col-6">
+                    <label class="sr-only" for="modulo">Clasificación Secundaria</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">Módulo</div>
+                        </div>
+                        <input type="text" class="form-control" id="modulo" value="" readonly>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="form-group col-6">
+                    <label class="mb-0" for="objeto">Descripción Objeto</label>
+                    <textarea class="form-control" id="objeto" rows="2"></textarea>
+                </div>
+
+                <div class="form-group col-6">
+                    <label class="mb-0" for="elemento">Descripción Elemento</label>
+                    <textarea class="form-control" id="elemento" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-12">
+                    <label class="mb-0" for="caracteristicas">Características</label>
+                    <textarea class="form-control" id="caracteristicas" rows="4"></textarea>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-12 mb-1">
+                    <label for="elemento">Ubicación del Equipo</label>
+                </div>
+                <div class="form-group col-6">
+                    <label class="sr-only" for="planta">Planta</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text"><i class="fa fa-fw fa-industry"></i></div>
+                        </div>
+                        <select id="planta" class="form-control"></select>
+                    </div>
+                </div>
+
+                <div class="form-group col-6">
+                    <label class="sr-only" for="area">Area</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text"><i class="fa fa-fw fa-map"></i></div>
+                        </div>
+                        <select id="area" class="form-control"></select>
+                    </div>
+                </div>
+
+                <div class="form-group col-12">
+                    <label class="sr-only" for="ubicacion">Ubicacion</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text"><i class="fa fa-fw fa-location-arrow"></i></div>
+                        </div>
+                        <select id="ubicacion" class="form-control"></select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="row">
+                <div class="col-6 text-center px-4">
+                    <button id="guardar" class="btn btn-primary btn-block"><i class="fa fa-fw fa-save mr-1s"></i> Guardar Cambios</button>
+                </div>
+                <div class="col-6 text-center px-4">
+                    <button id="cancelar" class="btn btn-danger btn-block"><i class="fa fa-fw fa-times-circle mr-1"></i>Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,196 @@
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script>
+    var instalaciones = {{{ json instalaciones }}};
+    //console.log(instalaciones);
+
+    function responseHandler(res) {
+        $.each(res.rows, function (i, row) {
+            row.state = $.inArray(row.id, selections) !== -1
+        })
+        return res
+    }
+</script>
+
+<ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/instalaciones">Instalaciones</a></li>
+    <li class="breadcrumb-item active">Infraestructuras</li>
+</ol>
+
+<div id="toolbar">
+    <a id="add" class="btn btn-outline-success" href="{{links.path}}{{links.add}}">
+        <i class="fa fa-fw fa-plus-circle"></i> Agregar Nueva Infraestructura
+    </a>    
+    <a id="plant" class="btn btn-outline-success ml-auto" href="{{links.path}}{{links.plant}}">
+        <i class="fa fa-fw fa-industry"></i> Buscar por Planta..
+    </a>
+</div>
+<div class="container-fluid">
+    <table 
+        class="table table-sm" 
+        {{!--class="table table-condensed" --}} 
+        {{!--class="table w-auto small" --}}
+        {{!--class="table w-auto text-small" --}}
+        data-show-custom-view="true"
+        data-custom-view="customViewFormatter"
+        id="table"
+        data-toggle="table" data-locale="es-ES"
+        {{!--data-url="json/data1.json" --}}
+        data-toolbar="#toolbar"
+        {{!--data-search="true"
+        data-advanced-search="true"--}}
+        data-show-refresh="true"
+        data-show-toggle="false"
+        data-show-fullscreen="true"
+        data-show-columns="true"
+        data-show-columns-toggle-all="true"
+        data-detail-view="true"
+        data-detail-formatter="detailFormatter"
+        data-show-export="true"
+        data-click-to-select="true"
+        data-sortable="true"
+        data-minimum-count-columns="2"
+        data-show-pagination-switch="true"
+        data-pagination="true"
+        data-id-field="codigo"
+        data-page-list="[5, 10, 15, 20, all]"
+        data-show-footer="false"
+        {{!--data-side-pagination="server" --}}
+        data-response-handler="responseHandler"
+        data-export-options= '{{ file_export_options }}'
+        {{!--data-export-types="['json', 'xml', 'png', 'csv', 'txt', 'sql', 'doc', 'excel', 'xlsx', 'pdf']"--}}
+        data-export-types="['json', 'csv', 'txt', 'doc', 'xlsx']"
+        >
+
+        <thead>
+            <tr>
+                <!--th data-field="id" data-sortable="true">ID</th-->
+                <th data-field="planta" data-sortable="true">Planta</th>
+                <th data-field="area" data-sortable="true">Area</th>
+                <th data-field="codigo">Codigo</th>
+                <th data-field="nombre">Nombre</th>
+                <th data-field="ambiente" data-sortable="true">Ambiente</th>
+                <th data-field="pisonivel" data-sortable="true">Piso Nivel</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {{#each instalaciones.infraestructuras}}
+            <tr>
+                <!--td>{{id}}</td-->
+                <td>{{planta}}</td>
+                <td>{{area}}</td>
+                <td>{{codigo}}</td>
+                <td>{{nombre}}</td>
+                <td>{{ambiente}}</td>
+                <td>{{pisonivel}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+
+</div>
+<div id="dialog"></div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script>
+
+    var $table = $('#table')
+    var $remove = $('#remove')
+    var selections = []
+
+    function editar(id) {
+        $.get(
+            '{{links.path}}{{links.edit}}', // url
+            { id }, // data to be submit
+            function (data) {
+                //console.log(data);            
+                //window.location = '{{links.path}}';
+            }
+        );
+    };
+
+    function eliminar(code, area) {
+        console.log(code);
+        console.log(area);
+
+        $("#dialog").dialog({
+            resizable: false,
+            height: "auto",
+            width: 400,
+            modal: true,
+            title: "Eliminar Infraestructura",
+            buttons: {
+                "Si": function () {
+                    $.post('{{links.path}}{{links.delete}}', // url
+                        { 'code': code, 'area': area } // data to be submit
+                    ).done(function (data) {
+                        window.location.href = {{{ json links.redirect }}};
+                    }).fail(function () {
+                        alert('Ocurrio un error');
+                        $("#dialog").dialog("close");
+                    });;
+                },
+                "No": function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+        $("#dialog").html(
+            '<p><span class="fa fa-2x fa-question-circle" style="float:left; margin:12px 12px 20px 0;"></span>Los datos de la infraestructura se eliminaran. Desea eliminar la infraestructura? </p>'
+        );
+        $("#dialog").dialog("open");
+    };
+
+    function detailFormatter(index, row) {
+        var html = []
+        var indexs = 0
+        var id = 0, codigo = "", area = 0;
+        var data = {};
+        //const zeroPad = (num, places) => String(num).padStart(places, '0');
+        $.each(row, function (key, value) {
+            //index +1 because first column is for `+`
+            //and data-field is column a ,column b..etc
+            var columns = $("th:eq(" + (indexs + 1) + ")").data("field")
+            if (columns != undefined) {
+                data[columns] = row[columns];
+                indexs++;
+            }
+
+        });
+        html.push([
+        '<div class="row justify-content-sm-center justify-content-lg-start mx-1">',
+        '<div class="card col-10 col-md-6 p-0">',
+            '<h5 class="card-header">'+data['codigo']+'</h5>',
+            '<div class="card-body">',
+                '<h4 class="card-title text-center mb-1">'+data['area']+'</h4>',
+                '<h6 class="card-subtitle text-center text-muted mb-2">'+data['planta']+'</h6>',
+                
+                '<h6 class="card-subtitle text-center">'+data['pisonivel']+'</h6>',
+                '<p class="card-text text-center">'+data['ambiente']+'</p>',
+            '</div>',
+            '<div class="card-footer text-right">',
+                //'<form  class="form-inline" onsubmit="return false;">',
+                    //'<label class="form-control" for="id">Código</label>',
+                    //'<input class="form-control text-center" type="text" id="id" name="id" disabled value="' + codigo + '">',
+
+                    '<a class="btn btn-outline-info mx-1" href="{{links.path}}{{links.edit}}?edit=' + data['codigo'] + '">',
+                        '<i class="fa fa-fw fa-edit"></i>',
+                        'Editar',
+                    '</a>',
+
+                    '<button class="btn btn-outline-danger mx-1" onClick="eliminar(' + data['codigo'] + ')">',
+                    '<i class="fa fa-fw fa-trash"></i>',
+                    'Eliminar',
+                    '</button>',
+                //'</form>',
+            '</div>',
+        '</div>',
+        '</div>'
+        ].join('')
+        );
+        return html.join('')
+    }
+
+</script>

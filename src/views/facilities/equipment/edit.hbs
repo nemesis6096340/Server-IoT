@@ -1,0 +1,433 @@
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+    var instalaciones = {{{ json instalaciones }}};
+    var equipo = Object.assign({}, instalaciones.equipo);
+
+    const zeroPad = (num, places) => String(num).padStart(places, '0');
+
+    function updateCodigo() {
+        if (equipo.ubicacion === 0) $("#code-area").html("---");
+        else $("#code-area").html(getArea(equipo.ubicacion));
+        if(equipo.id % 1000 === 0) $("#code-sub").hide();
+        else $("#sub").show();
+
+        $("#code-id").html(zeroPad(Math.trunc(equipo.id/1000), 3)); 
+        $("#code-sub").html(zeroPad(Math.trunc(equipo.id%1000), 3)); 
+
+        $('#clase').val(getClase(Math.trunc(equipo.id / 1000)));
+        $('#modulo').val(getModulo(equipo.id % 1000));
+        if (equipo.id % 1000 == 0 && !equipo.actualizar) {
+            $("#elemento").val("General");
+        }
+        let indexId = instalaciones.equipos.findIndex(x => x.id === equipo.id);
+        if (!equipo.actualizar) {
+            if (indexId != -1) {
+                if (!instalaciones.equipos[indexId].eliminado) {
+                    $('#id').addClass('bg-danger text-white');
+                    $('#sub').addClass('bg-danger text-white');
+                    $("#guardar").attr('disabled', true);
+                }
+            } else if (equipo.id == 0) {
+                $('#id').addClass('bg-danger text-white');
+                $('#sub').addClass('bg-danger text-white');
+                $("#guardar").attr('disabled', true);
+            } else {
+                $('#id').removeClass('bg-danger text-white');
+                $('#sub').removeClass('bg-danger text-white');
+                $("#guardar").attr('disabled', false);
+            }
+        }
+        else {
+            $("#guardar").attr('disabled', JSON.stringify(equipo) === JSON.stringify(instalaciones.equipo));
+        }
+    };
+
+    function init() {
+
+        updateCodigo();
+        $("#guardar").attr('disabled', true);
+        $("#id").val(equipo.id / 1000);
+        $("#id").attr('readonly', equipo.actualizar);
+        $('#id').change(function () {
+            equipo.id = parseInt($("#id").val(), 10) * 1000 + parseInt($("#sub").val(), 10);
+            updateCodigo();
+        });
+        $("#sub").val(equipo.id % 1000);
+        $("#sub").attr('readonly', equipo.actualizar);
+        $('#sub').change(function () {
+            equipo.id = parseInt($("#id").val(), 10) * 1000 + parseInt($("#sub").val(), 10);
+            updateCodigo();
+        });
+
+        $("#gmp").prop('checked', equipo.gmp);
+        $('#gmp').change(function () {
+            //equipo.gmp = $(this).is(":checked");
+            equipo.gmp = (this.checked ? 1 : 0);
+            updateCodigo();
+        });
+
+        $("#calibracion").val(equipo.calibracion);
+        $('#calibracion').change(function () {
+            equipo.calibracion = parseInt($("#calibracion").val(), 10);
+            updateCodigo();
+        });
+
+        $("#tipo").val(equipo.tipo);
+        $('#tipo').change(function () {
+            equipo.tipo = parseInt($("#tipo").val(), 10);
+            updateCodigo();
+        });
+
+        $("#objeto").val(equipo.objeto);
+        $("#objeto").on('change', function (event) {
+            equipo.objeto = $("#objeto").val();
+            updateCodigo();
+        });
+
+        $("#elemento").val(equipo.elemento);
+        $("#elemento").on('change', function (event) {
+            equipo.elemento = $("#elemento").val();
+            updateCodigo();
+        });
+
+        $("#caracteristicas").val(equipo.caracteristicas);
+        $("#caracteristicas").on('change', function (event) {
+            equipo.caracteristicas = $("#caracteristicas").val();
+            updateCodigo();
+        });
+
+        loadPlanta();
+        $("#planta").on('change', function (event) {
+            loadArea(event.target.value);
+            loadUbicacion(-1);
+        });
+
+        let indexUbicacion = instalaciones.ubicacion.findIndex(x => x.id === equipo.ubicacion);
+        if (indexUbicacion != -1) {
+            let area = instalaciones.ubicacion[indexUbicacion].area;
+            //console.log(area);
+            let indexArea = instalaciones.area.findIndex(x => x.codigo === area);
+            //console.log(indexArea);
+            if (indexArea != -1) {
+                let planta = instalaciones.area[indexArea].planta;
+                //console.log(planta);
+                let indexPlanta = instalaciones.planta.findIndex(x => x.codigo === planta);
+                if (indexPlanta != -1) {
+                    $("#planta").val(indexPlanta);
+                    loadArea(indexPlanta);
+                    $("#area").val(indexArea);
+                    loadUbicacion(indexArea);
+                    $("#ubicacion").val(indexUbicacion);
+                }
+            }
+        }
+
+        $("#area").on('change', function (event) {
+            loadUbicacion(event.target.value);
+        });
+
+        $("#ubicacion").on('change', function (event) {
+            let index = parseInt(event.target.value);
+            equipo.ubicacion = instalaciones.ubicacion[index].id;
+            updateCodigo();
+        });
+
+    };
+
+    function loadPlanta() {
+        $("#planta").empty();
+        for (let i = 0; i < instalaciones.planta.length; i++) {
+            $("#planta").append('<option value=' + i + '>' + instalaciones.planta[i].detalle + '</option>');
+        }
+        $("#planta").val(-1);
+    };
+
+    function loadArea(index) {
+        $("#area").empty();
+        if (index != -1) {
+            for (let i = 0; i < instalaciones.area.length; i++) {
+                if (instalaciones.area[i].planta == instalaciones.planta[index].codigo) {
+                    $("#area").append('<option value=' + i + '>' + instalaciones.area[i].detalle + '</option>');
+                }
+            }
+            $("#area").val(-1);
+        }
+    };
+
+    function loadUbicacion(index) {
+        $("#ubicacion").empty();
+        for (let i = 0; i < instalaciones.ubicacion.length; i++) {
+            if (instalaciones.ubicacion[i].area == instalaciones.area[index].codigo) {
+                $("#ubicacion").append('<option value=' + i + '>' + instalaciones.ubicacion[i].detalle + '</option>');
+            }
+        }
+        $("#ubicacion").val(-1);
+    };
+
+    function getClase(numero) {
+        for (let i = 0; i < instalaciones.clase.length; i++) {
+            if (numero >= instalaciones.clase[i].desde && numero <= instalaciones.clase[i].hasta) {
+                return instalaciones.clase[i].detalle;
+            }
+        }
+        return 'No Tiene Clasificacion Primaria';
+    };
+
+    function getModulo(numero) {
+        for (let i = 0; i < instalaciones.modulo.length; i++) {
+            if (numero >= instalaciones.modulo[i].desde && numero <= instalaciones.modulo[i].hasta) {
+                return instalaciones.modulo[i].detalle;
+            }
+        }
+        return 'No Tiene Clasificacion Secundaria';
+    };
+
+    function getArea(ubicacion){
+        let area="";
+        let indexUbicacion = instalaciones.ubicacion.findIndex(x => x.id === ubicacion);
+        if (indexUbicacion != -1) {
+            area = instalaciones.ubicacion[indexUbicacion].area;
+            //console.log(area);
+        }
+        return area;
+    }
+
+    $(function () {
+
+        init();
+
+        $("#dialog").dialog({
+            autoOpen: false,
+            show: {
+                effect: "slide",
+                duration: 500
+            },
+            hide: {
+                effect: "blind",
+                duration: 500
+            }
+        });
+
+        $("#guardar").click(function () {
+            //equipo.calibracion = parseInt($("#calibracion").val(), 10);
+            //equipo.tipo = parseInt($("#tipo").val(), 10);
+
+            $("#dialog").dialog({
+                resizable: false,
+                height: "auto",
+                width: 400,
+                modal: true,
+                title: "Guardar Equipo",
+                buttons: {
+                    "Guardar Cambios": function () {
+                        console.log(equipo);
+                        if (!equipo.actualizar) {
+                            $.post('{{links.path}}{{links.save}}',   // url
+                                { equipo } // data to be submit
+                            ).done(function (data) {
+                                window.location.href = '{{links.path}}';
+                            }).fail(function () {
+                                alert('Ocurrio un error');
+                            });
+                            $("#dialog").dialog("close");
+                        }
+                        else {
+                            $.post('{{links.path}}{{links.update}}',   // url
+                                { equipo }
+                            ).done(function (data) {
+                                window.location.href = '{{links.path}}';
+                            }).fail(function () {
+                                alert('Ocurrio un error');
+                            });
+                            $(this).dialog("close");
+                        }
+
+                    },
+                    "Cancelar": function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+            $("#dialog").html(
+                '<p><span class="fa fa-2x fa-question-circle" style="float:left; margin:12px 12px 20px 0;"></span>Desea guardar los datos del equipo?</p>'
+            );
+            $("#dialog").dialog("open");
+        });
+
+        $("#cancelar").click(function () {
+            if (JSON.stringify(equipo) === JSON.stringify(instalaciones.equipo)) {
+                location.href = "{{links.path}}";
+            }
+            else {
+                $("#dialog").dialog({
+                    resizable: false,
+                    height: "auto",
+                    width: 400,
+                    modal: true,
+                    title: "Cancelar",
+                    buttons: {
+                        "Si": function () {
+                            location.href = "{{links.path}}"
+                        },
+                        "No": function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+                $("#dialog").html(
+                    '<p><span class="fa fa-2x fa-exclamation-triangle" style="float:left; margin:12px 12px 20px 0;"></span>Si Cancela, los datos del equipo no se guardaran. Desea salir del editor? </p>'
+                );
+                $("#dialog").dialog("open");
+            }
+        });
+    });
+
+
+</script>
+
+<div id="dialog"></div>
+
+<div class="container">
+    <div class="card {{card.border}} my-2">
+        <div class="card-header {{card.header}}">
+            {{card.title}}
+        </div>
+        <h1 class="card-title text-center my-4">
+            <span id="code-area" class="border font-weight-bold text-center text-monospace p-2 ">---</span>
+            <span id="code-id"   class="border font-weight-bold text-center text-monospace p-2 ">---</span>
+            <span id="code-sub"  class="border font-weight-bold text-center text-monospace p-2 ">---</span>            
+        </h1>
+        <div class="card-body">
+            <div class="row">
+                <div class="form-group col-8 col-sm-6 col-md-6 col-lg-3 mb-1">
+                    <label class="sr-only" for="id">ID del equipo</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">ID</div>
+                        </div>
+                        <input type="number" class="form-control text-center" id="id"  step=1 min="0" max="999" autocomplete="off">
+                        <input type="number" class="form-control text-center" id="sub" step=1 min="0" max="999" autocomplete="off">
+                    </div>
+                </div>
+                <div class="form-group col-2 col-sm-4 col-md-1 mb-1">
+                    <div class="input-group my-2 ml-4">
+                        <input class="form-check-input" type="checkbox" value="" id="gmp" aria-describedby="gmpHelp">
+                        <label class="form-check-label" for="gmp"> GMP </label>
+                    </div>
+                </div>
+                <div class="form-group col-sm-12 col-md-6  col-lg-4 mb-1">
+                    <label class="sr-only" for="calibracion">Tipo de Calibración</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text px-1">Calibración</div>
+                        </div>
+                        <select id="calibracion" class="form-control">
+                            {{#each instalaciones.calibracion}}
+                            <option value={{id}}>{{detalle}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group col-sm-12 col-md-6  col-lg-4 mb-1">
+                    <label class="sr-only" for="tipo">Tipo de Equipo</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text px-1">Tipo</div>
+                        </div>
+                        <select id="tipo" class="form-control">
+                            {{#each instalaciones.tipo}}
+                            <option value={{id}}>{{detalle}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-6">
+                    <label class="sr-only" for="clase">Clasificación Primaria</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">Clase</div>
+                        </div>
+                        <input type="text" class="form-control" id="clase" value="" readonly>
+                    </div>
+                </div>
+                <div class="form-group col-6">
+                    <label class="sr-only" for="modulo">Clasificación Secundaria</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">Módulo</div>
+                        </div>
+                        <input type="text" class="form-control" id="modulo" value="" readonly>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="form-group col-6">
+                    <label class="mb-0" for="objeto">Descripción Objeto</label>
+                    <textarea class="form-control" id="objeto" rows="2"></textarea>
+                </div>
+
+                <div class="form-group col-6">
+                    <label class="mb-0" for="elemento">Descripción Elemento</label>
+                    <textarea class="form-control" id="elemento" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-12">
+                    <label class="mb-0" for="caracteristicas">Características</label>
+                    <textarea class="form-control" id="caracteristicas" rows="4"></textarea>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-12 mb-1">
+                    <label for="elemento">Ubicación del Equipo</label>
+                </div>
+                <div class="form-group col-6">
+                    <label class="sr-only" for="planta">Planta</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text"><i class="fa fa-fw fa-industry mr-1"></i>Planta</div>
+                        </div>
+                        <select id="planta" class="form-control"></select>
+                    </div>
+                </div>
+
+                <div class="form-group col-6">
+                    <label class="sr-only" for="area">Area</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text"><i class="fa fa-fw fa-map mr-1"></i>Area</div>
+                        </div>
+                        <select id="area" class="form-control"></select>
+                    </div>
+                </div>
+
+                <div class="form-group col-12">
+                    <label class="sr-only" for="ubicacion">Ubicacion</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text"><i class="fa fa-fw fa-location-arrow mr-1"></i>Ubicacion</div>
+                        </div>
+                        <select id="ubicacion" class="form-control"></select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="row">
+                <div class="col-6 text-center px-4">
+                    <button id="guardar" class="btn btn-outline-primary btn-block"><i class="fa fa-fw fa-save mr-1s"></i> Guardar Cambios</button>
+                </div>
+                <div class="col-6 text-center px-4">
+                    <button id="cancelar" class="btn btn-outline-danger btn-block"><i class="fa fa-fw fa-times-circle mr-1"></i>Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

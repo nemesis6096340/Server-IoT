@@ -1,0 +1,319 @@
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+    var instalaciones = {{{ json instalaciones }}};
+    var infraestructura = Object.assign({}, instalaciones.infraestructura);
+    const zeroPad = (num, places) => String(num).padStart(places, '0');    
+    function updateCodigo() {
+        $("#code").val(infraestructura.codigo);
+        
+        if (infraestructura.area === "") $("#code-area").html("---");
+        else $("#code-area").html(infraestructura.area);
+
+        $("#code-id").html(zeroPad(infraestructura.codigo, 2));
+
+        if (infraestructura.ambiente == "") $("#code-ambiente").html("-");
+        else $("#code-ambiente").html(infraestructura.ambiente);
+
+        if (infraestructura.pisonivel == "") $("#code-pisonivel").html("-");
+        else $("#code-pisonivel").html(infraestructura.pisonivel);
+
+        let indexId = instalaciones.infraestructuras.findIndex(x => (x.codigo === infraestructura.codigo && x.area === infraestructura.area));
+        if (!infraestructura.actualizar) {
+            if (indexId != -1) {
+                if (!instalaciones.infraestructuras[indexId].eliminado) {
+                    $('#code').addClass('bg-danger text-white');
+                    $("#guardar").attr('disabled', true);
+                }
+            } else {
+                $('#code').removeClass('bg-danger text-white');
+                $("#guardar").attr('disabled', false);
+            }
+        }
+        else {
+            $("#guardar").attr('disabled', JSON.stringify(infraestructura) === JSON.stringify(instalaciones.infraestructura));
+        }
+    };
+
+    function init() {
+
+        updateCodigo();
+        $("#guardar").attr('disabled', true);
+
+        $("#code").attr('readonly', infraestructura.actualizar);
+        $("#code").val(infraestructura.codigo);
+        $('#code').change(function () {
+            infraestructura.codigo = parseInt($("#code").val(), 10);
+            updateCodigo();
+        });
+
+        loadAmbiente();
+        let indexAmbiente = instalaciones.ambiente.findIndex(x => x.ambiente === infraestructura.ambiente);
+        $("#ambiente").val(indexAmbiente);
+        $("#ambiente").on('change', function (event) {
+            let pos = parseInt(event.target.value);
+            infraestructura.ambiente = instalaciones.ambiente[pos].ambiente;
+            updateCodigo();
+        });
+
+        loadPisoNivel();
+        let indexPisoNivel = instalaciones.pisonivel.findIndex(x => x.pisonivel === infraestructura.pisonivel);
+        $("#pisonivel").val(indexPisoNivel);
+        $("#pisonivel").on('change', function (event) {
+            let pos = parseInt(event.target.value);
+            infraestructura.pisonivel = instalaciones.pisonivel[pos].pisonivel;
+            updateCodigo();
+        });
+
+        $("#detalle").val(infraestructura.detalle);
+        $('#detalle').change(function () {
+            infraestructura.detalle = $(this).val();
+            updateCodigo();
+        });
+
+        loadPlanta();
+        $("#planta").prop('disabled', infraestructura.actualizar);
+        let indexArea = instalaciones.area.findIndex(x => x.area === infraestructura.area);
+        let indexPlanta = -1;
+        if (indexArea != -1)
+            indexPlanta = instalaciones.planta.findIndex(x => x.planta === instalaciones.area[indexArea].planta);
+        loadArea(indexPlanta);
+        $("#planta").val(indexPlanta);
+        $("#planta").on('change', function (event) {
+            let index = parseInt(event.target.value);
+            loadArea(index);
+            infraestructura.area = "";
+            updateCodigo();
+        });
+
+        $('#area').prop('disabled', infraestructura.actualizar);
+        $("#area").val(indexArea);
+        $("#area").on('change', function (event) {
+            let index = parseInt(event.target.value);
+            infraestructura.area = instalaciones.area[index].codigo;
+            //let max  = Math.max.apply(Math, infraestructuras..map(function(o) { return o.y; }))
+            //let code = instalaciones.infraestructuras.reduce(o.area == infraestructura.area ? o.codigo:-1)+1;            
+            let codigo = Math.max.apply(Math, instalaciones.infraestructuras.filter(obj => obj.area === infraestructura.area).map(function (o) { return o.codigo; }));
+            if (codigo < 0 || codigo > 100) codigo = 0; else codigo++;
+            infraestructura.codigo = codigo;
+            updateCodigo();
+        });
+    };
+
+    function loadAmbiente() {
+        $("#ambiente").empty();
+        for (let i = 0; i < instalaciones.ambiente.length; i++) {
+            $("#ambiente").append('<option value=' + i + '>' + instalaciones.ambiente[i].descripcion + '</option>');
+        }
+    };
+
+    function loadPisoNivel() {
+        $("#pisonivel").empty();
+        for (let i = 0; i < instalaciones.pisonivel.length; i++) {
+            $("#pisonivel").append('<option value=' + i + '>' + instalaciones.pisonivel[i].descripcion + '</option>');
+        }
+    };
+
+    function loadPlanta() {
+        $("#planta").empty();
+        for (let i = 0; i < instalaciones.planta.length; i++) {
+            $("#planta").append('<option value=' + i + '>' + instalaciones.planta[i].descripcion + '</option>');
+        }
+    };
+
+    function loadArea(index) {
+        $("#area").empty();
+        if (index != -1) {
+            for (let i = 0; i < instalaciones.area.length; i++) {
+                if (instalaciones.area[i].planta == instalaciones.planta[index].planta) {
+                    $("#area").append('<option value=' + i + '>' + instalaciones.area[i].descripcion + '</option>');
+                }
+            }
+            $("#area").val(-1);
+        }
+    };
+
+    $(function () {
+        init();
+
+        $("#dialog").dialog({
+            autoOpen: false,
+            show: {
+                effect: "slide",
+                duration: 500
+            },
+            hide: {
+                effect: "blind",
+                duration: 500
+            }
+        });
+
+        $("#message").dialog({
+            autoOpen: false
+        });
+
+        $("#guardar").click(function () {
+            $("#dialog").dialog({
+                resizable: false,
+                height: "auto",
+                width: 400,
+                modal: true,
+                title: "Guardar Infraestructura",
+                buttons: {
+                    "Guardar Cambios": function () {
+                        if (!infraestructura.actualizar) {
+                            $.post("{{links.path}}{{links.save}}",
+                                { infraestructura }
+                            ).done(function (data) {
+                                window.location.href = {{{ json links.redirect }}};
+                            }).fail(function () {
+                                alert('Ocurrio un error');
+                                $("#dialog").dialog("close");
+                            });
+                        }
+                        else {
+                            $.post(
+                                "{{links.path}}{{links.update}}",
+                                { infraestructura }
+                            ).done(function (data) {
+                                window.location.href = {{{ json links.redirect }}};
+                            }).fail(function () {
+                                alert('Ocurrio un error');
+                            });
+                            $("#dialog").dialog("close");
+                        }
+                    },
+                    "Cancelar": function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+            if (!infraestructura.actualizar) {
+                $("#dialog").html(
+                    '<p><span class="fa fa-2x fa-question-circle" style="float:left; margin:12px 12px 20px 0;"></span>Los nuevos datos de la infraestructura seran guardados al confirmar. Desea Guardar los cambios? </p>'
+                );
+            }
+            else {
+                $("#dialog").html(
+                    '<p><span class="fa fa-2x fa-question-circle" style="float:left; margin:12px 12px 20px 0;"></span>La modificación  de los datos de la infraestructura seran actualizados al confirmar. Desea Guardar los cambios? </p>'
+                );
+            }
+            $("#dialog").dialog("open");
+        });
+
+        $("#cancelar").click(function () {
+            if (JSON.stringify(infraestructura) === JSON.stringify(instalaciones.infraestructura)) {
+                window.location.href = {{{ json links.redirect }}};
+            } 
+            else {
+                $("#dialog").dialog({
+                    resizable: false,
+                    height: "auto",
+                    width: 400,
+                    modal: true,
+                    title: "Confirmar",
+                    buttons: {
+                        "Si": function () {
+                            window.location.href = {{{ json links.redirect }}};
+                        },
+                        "No": function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+                $("#dialog").html(
+                    '<p><span class="fa fa-2x fa-exclamation-triangle" style="float:left; margin:12px 12px 20px 0;"></span>Si Cancela, los datos de la infraestructura no se guardaran. Desea salir del editor? </p>'
+                );
+                $("#dialog").dialog("open");
+            }        
+        });
+    });
+</script>
+<div id="dialog"></div>
+<div id="message"></div>
+<div class="container">
+    <div class="card {{card.border}} my-2">
+        <div class="card-header bg-secondary {{card.header}}">
+            {{card.title}}
+        </div>
+        <h1 class="card-title text-center my-4">
+            <span id="code-area" class="border font-weight-bold text-center text-monospace p-2 ">---</span>
+            <span id="code-id" class="border font-weight-bold text-center text-monospace p-2 ">--</span>
+            <span id="code-ambiente" class="border font-weight-bold text-center text-monospace p-2 ">-</span>
+            <span id="code-pisonivel" class="border font-weight-bold text-center text-monospace p-2 ">-</span>
+        </h1>
+        <div class="card-body">
+            <div class="row">
+                <div class="form-group col-12 mb-1">
+                    <h5 class="border-bottom">Codificación de Infraestructura:</h5>
+                </div>
+                <div class="form-group col-6 col-md-3 col-lg-2 mb-1">
+                    <label class="sr-only" for="code">ID</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">ID</div>
+                        </div>
+                        <input type="number" autocomplete="off" class="form-control text-center" id="code" step=1 min="1" max="99">
+                    </div>
+                </div>
+
+                <div class="form-group col-12 col-md-9  col-lg-6 mb-1">
+                    <label class="sr-only" for="ambiente">Ambiente</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text px-1">Ambiente</div>
+                        </div>
+                        <select id="ambiente" class="form-control selectpicker"></select>
+                    </div>
+                </div>
+                <div class="form-group col-12 col-sm-12 col-md-6  col-lg-4 mb-1">
+                    <label class="sr-only" for="pisonivel">Piso Nivel</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text px-1">Piso Nivel</div>
+                        </div>
+                        <select id="pisonivel" class="form-control"></select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-12 mt-4 mb-1">
+                    <h5 class="border-bottom">Ubicación de la Infraestructura:</h5>
+                </div>
+                <div class="form-group col-12 mb-1">
+                    <label class="sr-only" for="detalle">Nombre</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">Ubicación</div>
+                        </div>
+                        <input type="text" class="form-control" id="detalle" placeholder="Ingrese el nombre de la ubicación..." value="">
+                    </div>
+                </div>
+                <div class="form-group col-12 col-md-6 mb-1">
+                    <label class="sr-only" for="planta">Planta</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">Planta</div>
+                        </div>
+                        <select id="planta" class="form-control"></select>
+                    </div>
+                </div>
+                <div class="form-group col-12 col-md-6 mb-1">
+                    <label class="sr-only" for="area">Area</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">Area</div>
+                        </div>
+                        <select id="area" class="form-control"></select>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="card-footer">
+            {{> edit_control}}
+        </div>
+
+    </div>
+</div>

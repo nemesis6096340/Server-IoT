@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+   <meta charset="UTF-8">
+   <title>Iniciar Sesión</title>
+   <meta name="viewport" content="width=device-width, initial-scale=1.0 shrink-to-fit=no, maximum-scale=1, user-scalable=no">
+
+   {{!-- GOOGLE FONTS --}}
+   <link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
+   {{!-- BOOTSTRAP 4 --}}
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/flatly/bootstrap.min.css" integrity="sha384-qF/QmIAj5ZaYFAeQcrQ6bfVMAh4zZlrGwTPY7T/M+iTTLJqJBJjwwnsE5Y0mV7QK" crossorigin="anonymous">
+   <!--link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"-->
+   {{!-- JQUERY Ui--}}
+   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+   {{!-- FONT AWESOME 5 --}}
+   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+   {{!-- STYLES --}}
+   <link rel="stylesheet" href="/css/styles.css">
+   {{!-- BOOTSTRAP TABLE --}}
+   <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
+
+   <!--script src="https://www.google.com/recaptcha/api.js"></script-->
+</head>
+
+<body>
+
+   <style>
+      body {
+         background: linear-gradient(-45deg, var(--secondary), var(--primary), var(--info), var(--success), var(--white));
+         background-size: 400% 400%;
+         animation: gradient 15s ease infinite;
+         height: 100vh;
+      }
+
+      @keyframes gradient {
+         0% {
+            background-position: 0% 50%;
+         }
+
+         50% {
+            background-position: 100% 50%;
+         }
+
+         100% {
+            background-position: 0% 50%;
+         }
+      }
+
+      #cover {
+         /*background: #222 url('https://unsplash.it/1920/1080/?random') center center no-repeat;*/
+         background-size: cover;
+         height: 100%;
+         text-align: center;
+         display: flex;
+         align-items: center;
+         position: relative;
+      }
+
+      #cover-caption {
+         width: 100%;
+         position: relative;
+         z-index: 1;
+      }
+
+      /* only used for background overlay not needed for centering */
+      form:before {
+         content: '';
+         height: 100%;
+         left: 0;
+         position: absolute;
+         top: 0;
+         width: 100%;
+         background-color: rgba(0, 0, 0, 0.3);
+         z-index: -1;
+         border-radius: 10px;
+      }
+   </style>
+
+   <style>
+      body {
+         font-family: 'Varela Round', sans-serif;
+      }
+
+      .modal-login {
+         color: #636363;
+         width: 350px;
+         margin: 80px auto 0;
+      }
+
+      .modal-login .modal-content {
+         padding: 20px;
+         border-radius: 5px;
+         border: none;
+      }
+
+      .modal-login .modal-header {
+         border-bottom: none;
+         position: relative;
+         justify-content: center;
+      }
+
+      .modal-login h4 {
+         text-align: center;
+         font-size: 26px;
+         margin: 30px 0 -15px;
+      }
+
+      .modal-login .form-control:focus {
+         border-color: var(--primary);
+      }
+
+      .modal-login .form-control,
+      .modal-login .btn {
+         min-height: 40px;
+         border-radius: 3px;
+      }
+
+      .modal-login .close {
+         position: absolute;
+         top: -5px;
+         right: -5px;
+      }
+
+      .modal-login .modal-footer {
+         background: #ecf0f1;
+         border-color: #dee4e7;
+         text-align: center;
+         justify-content: center;
+         margin: 0 -20px -20px;
+         border-radius: 5px;
+         font-size: 13px;
+      }
+
+      .modal-login .modal-footer a {
+         color: #999;
+      }
+
+      .modal-login .avatar {
+
+         position: absolute;
+         margin: 0 auto;
+         left: 0;
+         right: 0;
+         top: -70px;
+         width: 95px;
+         height: 95px;
+         border-radius: 50%;
+         z-index: 9;
+         background: var(--primary);
+         padding: 15px;
+         box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
+         text-align: center;
+      }
+
+      .modal-login .avatar i {
+         color: #fff;
+         display: table-cell;
+         vertical-align: middle;
+         text-align: center;
+         margin: auto;
+         display: block;
+      }
+
+      .modal-login .btn {
+         color: #fff;
+         border-radius: 4px;
+         background: var(--primary);
+         text-decoration: none;
+         transition: all 0.4s;
+         line-height: normal;
+         border: none;
+      }
+
+      .modal-login .btn:hover,
+      .modal-login .btn:focus {
+         background: var(--primary);
+         outline: none;
+      }
+
+      .trigger-btn {
+         display: inline-block;
+         margin: 100px auto;
+      }
+   </style>
+
+   <section id="cover" class="min-vh-100">
+      <div id="cover-caption">
+         <div class="container">
+            <div class="row text-white">
+               <div class="col-xl-5 col-lg-6 col-md-8 col-sm-10 mx-auto text-center form p-4">
+
+                  <div id="modalLogin">
+                     <div class="modal-dialog modal-login">
+                        <div class="modal-content">
+                           <div class="modal-header">
+                              <div class="avatar">
+                                 <i class="fa fa-user fa-4x" aria-hidden="true"></i>
+                              </div>
+                              <h4 class="modal-title">Iniciar Sesión</h4>
+
+                           </div>
+                           <div class="modal-body">
+                              <form action="/login" method="post">
+
+                                 <div class="input-group mb-3">
+                                    <span class="input-group-text" id="basic-addon1">@</span>
+                                    <input type="email" class="form-control" name="email" placeholder="Correo electrónico" required="required" aria-describedby="basic-addon1">
+                                 </div>
+
+                                 <div class="input-group mb-3">
+                                    <span class="input-group-text" id="basic-addon2"><i class="fa fa-lock" aria-hidden="true"></i></span>
+                                    <input type="password" class="form-control" name="password" placeholder="Contraseña" required="required" aria-describedby="basic-addon2">
+                                 </div>
+
+                                 <div class="form-group">
+                                    <button type="submit" class="btn btn-primary btn-lg btn-block login-btn">Login</button>
+                                 </div>
+                              </form>
+                           </div>
+                           <div class="modal-footer">
+                              <form action="/forgot" method="get">
+                                 <a href="#">Forgot Password?</a>
+                              </form>
+                           </div>
+                        </div>
+                     </div>
+
+
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </section>
+
+   {{> partial_messages}}
+   {{> partial_errors}}
+
+   {{!-- SCRIPTS --}}
+   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+   {{!-- JQUERY Ui--}}
+   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+   <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery.form/3.51/jquery.form.min.js"></script>
+
+</body>
+
+</html>
