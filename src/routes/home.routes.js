@@ -1,12 +1,9 @@
 import { Router } from "express";
 const router = Router();
 
+import { isLoggedIn, isNotLoggedIn } from '../lib/authentication.js';
 import home  from "../controllers/home.controller.js";
 
-router.get("/", function(req,res){
-    res.redirect('/login');
-});
-
-router.get("/home", home.renderHome);
+router.get("/",isNotLoggedIn ,home.renderHome);
 
 export default router;

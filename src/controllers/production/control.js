@@ -59,7 +59,7 @@ const controlCtrl = {};
 
 controlCtrl.logger = function (req, res) {
     var data = JSON.parse(JSON.stringify(req.body));
-    console.log(JSON.stringify(data));
+    //console.log(JSON.stringify(data));
     var counter = counters.find(x => x.id === data.id);
     if (counter) {
         //TOTAL, RESET, LAP,  EVENT,  NEW,  START,  FINISH, RESTART
@@ -143,7 +143,7 @@ controlCtrl.logger = function (req, res) {
         }
     }
     else {
-        console.log("No Existe");
+        //console.log("No Existe");
     }
 
 };
