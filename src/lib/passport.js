@@ -31,14 +31,14 @@ passport.use(
                 const match = await helpers.matchPassword(password, user.password)
                 if (match) {
                     console.log("Success Login.");
-                    done(null, user, req.flash('success', 'Welcome ' + user.username));
+                    return done(null, user, req.flash('success', 'Welcome ' + user.username));
                 } else {
                     console.log('Incorrect Password');
-                    done(null, false, req.flash('message', 'Incorrect Password'));
+                    return done(null, false, req.flash('message', 'Incorrect Password'));
                 }
             } else {
                 console.log('The Username does not exists.');
-                done(
+                return done(
                     null,
                     false,
                     req.flash('message', 'The Username does not exists.')

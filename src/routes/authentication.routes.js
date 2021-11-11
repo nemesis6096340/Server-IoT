@@ -7,10 +7,11 @@ const router = Router();
 //passportConfig(passport);
 
 import { isLoggedIn, isNotLoggedIn } from '../lib/authentication.js';
+import validation from '../controllers/validator.controller.js';
 import authentication from "../controllers/authentication.controller.js";
 
 router.get('/login', isNotLoggedIn, authentication.renderLogin);
-router.post('/login', isNotLoggedIn, authentication.validator('loginUser') , authentication.reCaptcha, authentication.Login);
+router.post('/login', isNotLoggedIn, validation.validator('loginUser') , validation.reCaptcha, authentication.Login);
 router.get('/logout', isLoggedIn, authentication.Logout);
 
 /*
@@ -27,6 +28,6 @@ router.post('/signup', passport.authenticate('local.signup', {
   failureFlash: true
 }));*/
 
-router.post('/signup', isNotLoggedIn, authentication.validator('accessRequests') ,authentication.Signup);
+router.post('/signup', isNotLoggedIn, validation.validator('accessRequests') ,authentication.Signup);
 
 export default router;

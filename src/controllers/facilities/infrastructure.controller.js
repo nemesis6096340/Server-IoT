@@ -14,7 +14,8 @@ const links = {
 };
 const infrastructureCtrl = {};
 
-infrastructureCtrl.plant = async function (req, res) {
+infrastructureCtrl.plant = async function (req, res) {    
+    console.log(req.session);
     let plant = JSON.parse(JSON.stringify(await pool.query("call mostrarPlantas();")));
     res.render('facilities/infrastructure/plants.hbs', { plant: plant[0] });
 }

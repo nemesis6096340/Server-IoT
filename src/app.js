@@ -69,7 +69,9 @@ app.use(
             secret: 'sesion secreta',
             store: sessionStore,
             resave: true,    
-            saveUninitialized: true
+            saveUninitialized: true,
+            cookie: {                
+            }
         }
     )
 );

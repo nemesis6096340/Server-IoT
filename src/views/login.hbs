@@ -47,7 +47,7 @@
                               <form {{!id="form-signin"}} method="post" action="/login">
                                  <input type="hidden" id="captcha" name="captcha">
                                  <input type="hidden" name="action" value="validate_captcha">
-                                 <div class="input-group mb-3">
+                                 <div class="input-group mb-3" >
                                     <span class="input-group-text" id="basic-addon1">@</span>
                                     <input class="form-control" id="email" name="email" type="email" placeholder="Correo electrónico" required="required" aria-describedby="basic-addon1" value="{{email}}">
                                  </div>
@@ -55,6 +55,7 @@
                                  <div class="input-group mb-3">
                                     <span class="input-group-text" id="basic-addon2"><i class="fa fa-lock" aria-hidden="true"></i></span>
                                     <input class="form-control" id="password" name="password" type="password" placeholder="Contraseña" required="required" aria-describedby="basic-addon2">
+                                    <div class="input-group-append" id="show_hide_password"><span class="input-group-text"><a class="text-dark"><i class="fa fa-eye-slash" aria-hidden="true"></i></a></span></div>
                                  </div>
 
                                  <div class="form-group">
@@ -99,7 +100,7 @@
    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
 
    <script>
-      $('#email').val('');
+      //$('#email').val('');
       $('#password').val('');
 
       grecaptcha.ready(function() {
@@ -148,5 +149,20 @@
    </script>
    {{>partial_loader_script}}
 </body>
-
+<script>
+   $(document).ready(function () {
+      $("#show_hide_password a").on('click', function (event) {
+         event.preventDefault();
+         if ($('#password').attr("type") == "text") {
+            $('#password').attr('type', 'password');
+            $('#show_hide_password i').addClass("fa-eye-slash");
+            $('#show_hide_password i').removeClass("fa-eye");
+         } else if ($('#password').attr("type") == "password") {
+            $('#password').attr('type', 'text');
+            $('#show_hide_password i').removeClass("fa-eye-slash");
+            $('#show_hide_password i').addClass("fa-eye");
+         }
+      });
+   });
+</script>
 </html>
