@@ -16,174 +16,16 @@
    {{!-- FONT AWESOME 5 --}}
    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
    {{!-- STYLES --}}
-   <link rel="stylesheet" href="/css/styles.css">
+   <link rel="stylesheet" href="/css/login-style.css">
    {{!-- BOOTSTRAP TABLE --}}
    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
-
-   <!--script src="https://www.google.com/recaptcha/api.js"></script-->
+   {{!-- GOOGLE RECAPTCHA --}}
+    <script src="https://www.google.com/recaptcha/api.js?render={{public_key}}"></script>
+   {{>partial_loader_style}}
 </head>
 
 <body>
-
-   <style>
-      body {
-         background: linear-gradient(-45deg, var(--primary),var(--primary), var(--info), var(--success), var(--success), var(--secondary),  var(--gray), var(--white));
-         background-size: 400% 400%;
-         animation: gradient 15s ease infinite;
-         height: 100vh;
-      }
-
-      @keyframes gradient {
-         0% {
-            background-position: 0% 50%;
-         }
-
-         50% {
-            background-position: 100% 50%;
-         }
-
-         100% {
-            background-position: 0% 50%;
-         }
-      }
-
-      #cover {
-         /*background: #222 url('https://unsplash.it/1920/1080/?random') center center no-repeat;*/
-         background-size: cover;
-         height: 100%;
-         text-align: center;
-         display: flex;
-         align-items: center;
-         position: relative;
-      }
-
-      #cover-caption {
-         width: 100%;
-         position: relative;
-         z-index: 1;
-      }
-
-      /* only used for background overlay not needed for centering */
-      form:before {
-         content: '';
-         height: 100%;
-         left: 0;
-         position: absolute;
-         top: 0;
-         width: 100%;
-         background-color: rgba(0, 0, 0, 0.3);
-         z-index: -1;
-         border-radius: 10px;
-      }
-   </style>
-
-   <style>
-      body {
-         font-family: 'Varela Round', sans-serif;
-      }
-
-      .modal-login {
-         color: #636363;
-         width: 350px;
-         margin: 80px auto 0;
-      }
-
-      .modal-login .modal-content {
-         padding: 20px;
-         border-radius: 5px;
-         border: none;
-      }
-
-      .modal-login .modal-header {
-         border-bottom: none;
-         position: relative;
-         justify-content: center;
-      }
-
-      .modal-login h4 {
-         text-align: center;
-         font-size: 26px;
-         margin: 30px 0 -15px;
-      }
-
-      .modal-login .form-control:focus {
-         border-color: var(--primary);
-      }
-
-      .modal-login .form-control,
-      .modal-login .btn {
-         min-height: 40px;
-         border-radius: 3px;
-      }
-
-      .modal-login .close {
-         position: absolute;
-         top: -5px;
-         right: -5px;
-      }
-
-      .modal-login .modal-footer {
-         background: #ecf0f1;
-         border-color: #dee4e7;
-         text-align: center;
-         justify-content: center;
-         margin: 0 -20px -20px;
-         border-radius: 5px;
-         font-size: 13px;
-      }
-
-      .modal-login .modal-footer a {
-         color: #999;
-      }
-
-      .modal-login .avatar {
-
-         position: absolute;
-         margin: 0 auto;
-         left: 0;
-         right: 0;
-         top: -70px;
-         width: 95px;
-         height: 95px;
-         border-radius: 50%;
-         z-index: 9;
-         background: var(--primary);
-         padding: 15px;
-         box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
-         text-align: center;
-      }
-
-      .modal-login .avatar i {
-         color: #fff;
-         display: table-cell;
-         vertical-align: middle;
-         text-align: center;
-         margin: auto;
-         display: block;
-      }
-
-      .modal-login .btn {
-         color: #fff;
-         border-radius: 4px;
-         background: var(--primary);
-         text-decoration: none;
-         transition: all 0.4s;
-         line-height: normal;
-         border: none;
-      }
-
-      .modal-login .btn:hover,
-      .modal-login .btn:focus {
-         background: var(--primary);
-         outline: none;
-      }
-
-      .trigger-btn {
-         display: inline-block;
-         margin: 100px auto;
-      }
-   </style>
-
+    {{>partial_loader_body}}                
    <section id="cover" class="min-vh-100">
       <div id="cover-caption">
          <div class="container">
@@ -197,20 +39,22 @@
                               <div class="avatar">
                                  <i class="fa fa-user fa-4x" aria-hidden="true"></i>
                               </div>
+
                               <h4 class="modal-title">Iniciar Sesión</h4>
 
                            </div>
                            <div class="modal-body">
-                              <form action="/login" method="post">
-
+                              <form {{!id="form-signin"}} method="post" action="/login">
+                                 <input type="hidden" id="captcha" name="captcha">
+                                 <input type="hidden" name="action" value="validate_captcha">
                                  <div class="input-group mb-3">
                                     <span class="input-group-text" id="basic-addon1">@</span>
-                                    <input type="email" class="form-control" name="email" placeholder="Correo electrónico" required="required" aria-describedby="basic-addon1">
+                                    <input class="form-control" id="email" name="email" type="email" placeholder="Correo electrónico" required="required" aria-describedby="basic-addon1" value="{{email}}">
                                  </div>
 
                                  <div class="input-group mb-3">
                                     <span class="input-group-text" id="basic-addon2"><i class="fa fa-lock" aria-hidden="true"></i></span>
-                                    <input type="password" class="form-control" name="password" placeholder="Contraseña" required="required" aria-describedby="basic-addon2">
+                                    <input class="form-control" id="password" name="password" type="password" placeholder="Contraseña" required="required" aria-describedby="basic-addon2">
                                  </div>
 
                                  <div class="form-group">
@@ -218,15 +62,19 @@
                                  </div>
                               </form>
                            </div>
-                           <div class="modal-footer">
+                           <div class="modal-footer ">
                               <form action="/forgot" method="get">
-                                 <a href="#">Forgot Password?</a>
+                                 <a href="#">Forgot Password?</a>                                 
                               </form>
+                              <a class="active ml-auto text-dark" href="/"><i class="fa fa-arrow-circle-left p-2 " aria-hidden="true"></i>Volver</a>
                            </div>
                         </div>
                      </div>
+                  </div>
 
-
+                  <div class="m-2">
+                     {{> partial_messages}}
+                     {{> partial_errors}}
                   </div>
                </div>
             </div>
@@ -234,13 +82,10 @@
       </div>
    </section>
 
-   {{> partial_messages}}
-   {{> partial_errors}}
-
    {{!-- SCRIPTS --}}
    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+   <!--script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script-->
    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
@@ -250,6 +95,58 @@
    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery.form/3.51/jquery.form.min.js"></script>
 
+   <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+   <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+
+   <script>
+      $('#email').val('');
+      $('#password').val('');
+
+      grecaptcha.ready(function() {
+      // do request for recaptcha token
+      // response is promise with passed token
+         grecaptcha.execute('{{public_key}}', { action: 'validate_captcha' }).then(function(token) {
+               // add token value to form
+               document.getElementById('captcha').value = token;
+         });
+      });
+      
+      $("#form-signin").submit(function (event) {
+         event.preventDefault();
+         runCaptcha();
+      });
+
+      function runCaptcha() {
+         grecaptcha.execute('{{public_key}}', { action: '/login' }).then(function (token) {
+               const email = $('#email').val();
+               const password = $('#password').val();
+               const captcha = token;
+               sendData(email, password, captcha);
+         });
+      };
+
+      function sendData(email, password, captcha) {
+         const info = JSON.stringify({ email: email, password: password,captcha: captcha });
+         $.ajax({
+            url: '/login',
+            type: 'post',
+            data: info,
+            headers: {
+               'Accept': 'application/json, text/plain, */*',
+               'Content-Type': 'application/json'
+            },
+            dataType: 'json',
+            success: function (data) {               
+               //window.location.href = '/dashboard';
+               console.log(data);
+            }
+            /*error: function(XMLHttpRequest, textStatus, errorThrown) {               
+               //window.location.href = '/login';
+            }*/
+         });       
+      }
+   </script>
+   {{>partial_loader_script}}
 </body>
 
 </html>

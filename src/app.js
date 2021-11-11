@@ -50,6 +50,7 @@ app.set('view engine', '.hbs');
 // -> Los datos recibidos son convertimos en objetos de javascript
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
 // Middlewares
 //app.use(morgan('dev'));
 

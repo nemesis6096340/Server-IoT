@@ -20,5 +20,10 @@ export default {
         port: process.env.DB_PORT,
         database: process.env.DB_NAME_SESSION,
     },
-    port: process.env.PORT || 4000
+    port: process.env.PORT || 4000,
+
+    captcha:{
+        public: process.env.V3_PUBLIC,
+        private: process.env.V3_PRIVATE
+    }
 };

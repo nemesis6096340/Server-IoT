@@ -1,13 +1,20 @@
 import pool from "../database.js";
 import passport from "passport";
 
-var public_key = '6LcisxQdAAAAACQbCj13NdP51JGstBahCoQ3n9Cb';
-var secret_key = '6LcisxQdAAAAABx15fNkpAaW5kONj2U0xtr8mBqZ';
+import request from "request";
+import config from "../config.js";
+import { body, validationResult } from "express-validator";
+
+const { captcha } = config;
 
 const authenticationCtrl = {};
 
 authenticationCtrl.renderLogin = function (req, res, next) {
-    res.render('login.hbs', { layout: false });
+    let email = req.query.email;
+    if (email)
+        res.render('login.hbs', { layout: false, email, public_key: captcha.public });
+    else
+        res.render('login.hbs', { layout: false, public_key: captcha.public });
 }
 
 authenticationCtrl.Login = passport.authenticate('local.signin', {
@@ -22,13 +29,131 @@ authenticationCtrl.Logout = function (req, res) {
     res.redirect('/login');
 }
 
-authenticationCtrl.signin = function (req, res) {
+authenticationCtrl.validator = function (method) {
+    switch (method) {
+        case 'createUser': {
+            return [
+                body('userName', 'El usuario no existe').exists(),
+                body('email', 'Invalid email').exists().isEmail(),
+                body('phone').optional().isInt(),
+                body('status').optional().isIn(['enabled', 'disabled'])
+            ]
+        }
+        case 'accessRequests': {
+            return [
+                body('email', 'Invalid email').exists().isEmail()
+            ]
+        }
+        case 'loginUser': {
+            return [
+                body('email', 'Invalid email').exists().isEmail(),
+                body('password', 'Invalid password').exists()
+            ]
+        }
+    }
+}
+
+authenticationCtrl.reCaptcha = function (req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        res.status(400).json({ errors: errors.array() });
+    }
+    console.log(req.body);
+    if (!req.body.captcha) {
+        res.json({ "message": "No se reconoce el captcha." });
+    }
+
+    const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${captcha.private}&response=${req.body.captcha}`;
+
+    request(verifyUrl, function (error, response, body) {
+        if (error) {
+            console.log(error);
+            req.flash("error", "Error de conexion, vuela intentarlo mas tarde.");
+            res.redirect('/');
+        }
+        body = JSON.parse(body);
+        if (!body.success || body.score < 0.4) {
+            req.flash("error", "Eres un Robot, has sido baneado.");
+            res.redirect('/');
+        }
+        //
+        console.log("reCaptcha");
+        console.log(body);
+        //res.json({ "message": "Captcha Ok", 'score': body.score , 'success':''});      
+        next();
+    });
+
+}
+
+authenticationCtrl.Signin = async function (req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+
+
+    /*
     const { email, password } = req.body;
     // req.session.my_variable = 'Hello World!';
     req.session.user_data = { email, password };
     req.flash('success', 'Now You are Registered')
-    res.redirect('/profile');
+    res.redirect('/profile');*/
 };
+
+authenticationCtrl.Signup = async function (req, res) {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    if (!req.body.captcha) {
+        return res.json({ "message": "No se reconoce el captcha." });
+    }
+    let data = req.connection.remoteAddress.split(':').pop();
+    //console.log(req.body);
+
+    let { email } = req.body;
+    const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${captcha.private}&response=${req.body.captcha}`;
+    request(verifyUrl, async function (error, response, body) {
+        if (error) {
+            console.log(error);
+            //return res.status(400).json(error);
+            req.flash("error", "Error de conexion, vuela intentarlo mas tarde.");
+            res.redirect('/');
+        }
+
+        body = JSON.parse(body);
+
+        if (!body.success || body.score < 0.4) {
+            return res.json({ 'title': 'Error', 'message': 'Eres un Robot, has sido baneado.', 'score': body.score });
+        }
+
+        let users = await pool.query('select * from db_UsuariosySesiones.usuarios;');
+        let access_requests = await pool.query('select * from db_UsuariosySesiones.solicitudes;');
+
+        if (access_requests.find(o => o.email === email)) {
+            req.flash("message", "Solicitud pendiente de confirmacion.");
+            return res.json({ 'title': 'Solicitud enviada', 'message': 'Su solicitud esta pendiente de confirmación.', 'score': 0, 'redirect': '/' });
+        }
+        if (!users.find(o => o.email === email)) {
+            let new_access = {};
+            new_access.email = email;
+            new_access.time = Math.floor(Date.now() / 1000);
+            new_access.data = data;
+            console.log(new_access);
+            let result = await pool.query("call db_UsuariosySesiones.agregarSolicitud(?,?,?)", [new_access.email, new_access.time, new_access.data]);
+            if (result.affectedRows === 1) {
+                console.log("Solicitud registrada");
+
+                return res.json({ 'title': 'Solicitud registrada', 'message': 'Su solicitud se ha registrado correctamente.', 'score': body.score, 'redirect': '/' });
+            }
+            return res.json({ 'title': 'Error', 'message': 'Error de solicitud.', 'score': body.score, 'redirect': '/' });
+        }
+        return res.json({ 'title': 'Usuario registrado', 'message': 'Verificación correcta, el usuario existe.', 'score': body.score, 'redirect': `/login?email=${email}` });
+    });
+}
 
 authenticationCtrl.register = function (req, res) {
     const { email, password } = req.body;
