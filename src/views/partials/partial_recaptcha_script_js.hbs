@@ -1,0 +1,10 @@
+<script>
+    grecaptcha.ready(function() {
+    // do request for recaptcha token
+    // response is promise with passed token
+        grecaptcha.execute('{{public_key}}', { action: 'validate_captcha' }).then(function(token) {
+            // add token value to form
+            document.getElementById('captcha').value = token;
+        });
+    });
+</script>

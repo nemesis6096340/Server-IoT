@@ -20,28 +20,26 @@ passport.use(
         },
 
         async function (req, email, password, done) {
-            console.log("PASSPORT");
-            console.log(req.body);                  
+            //console.log(req.body);
             let users = await pool.query('SELECT * FROM db_UsuariosySesiones.usuarios');
-
             let index_user = users.findIndex(x => x.email === email);
             console.log(index_user);
             if (index_user !== -1) {
                 const user = users[index_user];
-                const match = await helpers.matchPassword(password, user.password)
+                const match = await helpers.matchPassword(password, user.password);
                 if (match) {
                     console.log("Success Login.");
-                    return done(null, user, req.flash('success', 'Welcome ' + user.username));
+                    return done(null, user, req.flash('success', 'Bienvenido ' + user.username));
                 } else {
                     console.log('Incorrect Password');
-                    return done(null, false, req.flash('message', 'Incorrect Password'));
+                    return done(null, false, req.flash('message', 'La contraseña no es correcta, inténtalo de nuevo.'));
                 }
             } else {
-                console.log('The Username does not exists.');
+                console.log("User don't exists.");           
                 return done(
                     null,
                     false,
-                    req.flash('message', 'The Username does not exists.')
+                    req.flash('message', 'El usuario no existe.')
                 );
             }
         }

@@ -3,6 +3,7 @@ import passport from "passport";
 
 import request from "request";
 import config from "../config.js";
+import { body } from "express-validator";
 const { captcha } = config;
 
 
@@ -10,7 +11,7 @@ const authenticationCtrl = {};
 
 authenticationCtrl.renderLogin = function (req, res, next) {
     let email = req.query.email;
-    console.log(req.session);
+    //console.log(req.session);
     if (email)
         res.render('login.hbs', { layout: false, email, public_key: captcha.public });
     else
@@ -29,8 +30,6 @@ authenticationCtrl.Logout = function (req, res) {
     res.redirect('/login');
 }
 
-
-
 authenticationCtrl.Signin = async function (req, res) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -48,56 +47,31 @@ authenticationCtrl.Signin = async function (req, res) {
 };
 
 authenticationCtrl.Signup = async function (req, res) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+    let {email} = req.body;
+    let users = await pool.query('select * from db_UsuariosySesiones.usuarios;');
+    let access_requests = await pool.query('select * from db_UsuariosySesiones.solicitudes;');
+
+    if (access_requests.find(o => o.email === email)) {
+        req.flash("message", "Solicitud pendiente de confirmacion.");
+        return res.redirect('/');
     }
-
-    if (!req.body.captcha) {
-        return res.json({ "message": "No se reconoce el captcha." });
+    if (!users.find(o => o.email === email)) {
+        let new_access = {};
+        new_access.email = email;
+        new_access.time = Math.floor(Date.now() / 1000);
+        new_access.data = data;
+        console.log(new_access);
+        let result = await pool.query("call db_UsuariosySesiones.agregarSolicitud(?,?,?)", [new_access.email, new_access.time, new_access.data]);
+        if (result.affectedRows === 1) {
+            console.log("Solicitud registrada");
+            req.flash("message", "Su solicitud se ha registrado correctamente.");
+            return res.redirect('/');
+        }
+        req.flash("error", "Ocurrió un error en su solicitud.");
+        return res.redirect('/');
     }
-    let data = req.connection.remoteAddress.split(':').pop();
-    //console.log(req.body);
-
-    let { email } = req.body;
-    const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${captcha.private}&response=${req.body.captcha}`;
-    request(verifyUrl, async function (error, response, body) {
-        if (error) {
-            console.log(error);
-            //return res.status(400).json(error);
-            req.flash("error", "Error de conexion, vuela intentarlo mas tarde.");
-            res.redirect('/');
-        }
-
-        body = JSON.parse(body);
-
-        if (!body.success || body.score < 0.4) {
-            return res.json({ 'title': 'Error', 'message': 'Eres un Robot, has sido baneado.', 'score': body.score });
-        }
-
-        let users = await pool.query('select * from db_UsuariosySesiones.usuarios;');
-        let access_requests = await pool.query('select * from db_UsuariosySesiones.solicitudes;');
-
-        if (access_requests.find(o => o.email === email)) {
-            req.flash("message", "Solicitud pendiente de confirmacion.");
-            return res.json({ 'title': 'Solicitud enviada', 'message': 'Su solicitud esta pendiente de confirmación.', 'score': 0, 'redirect': '/' });
-        }
-        if (!users.find(o => o.email === email)) {
-            let new_access = {};
-            new_access.email = email;
-            new_access.time = Math.floor(Date.now() / 1000);
-            new_access.data = data;
-            console.log(new_access);
-            let result = await pool.query("call db_UsuariosySesiones.agregarSolicitud(?,?,?)", [new_access.email, new_access.time, new_access.data]);
-            if (result.affectedRows === 1) {
-                console.log("Solicitud registrada");
-
-                return res.json({ 'title': 'Solicitud registrada', 'message': 'Su solicitud se ha registrado correctamente.', 'score': body.score, 'redirect': '/' });
-            }
-            return res.json({ 'title': 'Error', 'message': 'Error de solicitud.', 'score': body.score, 'redirect': '/' });
-        }
-        return res.json({ 'title': 'Usuario registrado', 'message': 'Verificación correcta, el usuario existe.', 'score': body.score, 'redirect': `/login?email=${email}` });
-    });
+    req.flash("message", "Verificación correcta, el usuario existe.");
+    return res.redirect(`/login?email=${email}`);
 }
 
 authenticationCtrl.register = function (req, res) {

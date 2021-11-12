@@ -7,7 +7,7 @@ import myconnection from 'express-myconnection';
 import config from "./config.js";
 import routes from "./routes/index.js";
 
-import {timeago} from "./lib/helpers.js"
+import { timeago } from "./lib/helpers.js"
 
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -15,9 +15,12 @@ import { dirname } from 'path';
 // -> Sesiones
 import session from "express-session";
 import flash from "connect-flash";
-import expressMySqlSession  from "express-mysql-session";
+import expressMySqlSession from "express-mysql-session";
 import passport from "passport";
 import "./lib/passport.js";
+
+// -> User - Agent
+import useragent from 'express-useragent';
 
 // -> Path
 const __filename = fileURLToPath(import.meta.url);
@@ -60,7 +63,7 @@ app.use(myconnection(mysql, db, 'single'));
 
 
 // -> Manejo de sesiones de usuario
-const MySQLStore   = expressMySqlSession(session);
+const MySQLStore = expressMySqlSession(session);
 const sessionStore = new MySQLStore(dbs);
 app.use(
     session(
@@ -68,9 +71,9 @@ app.use(
             key: 'cockie_usuario',
             secret: 'sesion secreta',
             store: sessionStore,
-            resave: true,    
+            resave: true,
             saveUninitialized: true,
-            cookie: {                
+            cookie: {
             }
         }
     )
@@ -94,6 +97,15 @@ app.get('/',function(req, res){
     
 });*/
 
+// Express session handling - Back button problem
+// No almacenar la cache.
+app.use(function (req, res, next) {
+    res.set('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
+    next();
+});
+
+// User-Agent
+app.use(useragent.express());
 
 // Variables Globales
 app.use(function (req, res, next) {

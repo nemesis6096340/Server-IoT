@@ -5,7 +5,7 @@
    <meta charset="UTF-8">
    <title>Iniciar Sesión</title>
    <meta name="viewport" content="width=device-width, initial-scale=1.0 shrink-to-fit=no, maximum-scale=1, user-scalable=no">
-
+   <meta http-equiv="refresh" content="120">
    {{!-- GOOGLE FONTS --}}
    <link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
    {{!-- BOOTSTRAP 4 --}}
@@ -19,8 +19,7 @@
    <link rel="stylesheet" href="/css/login-style.css">
    {{!-- BOOTSTRAP TABLE --}}
    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
-   {{!-- GOOGLE RECAPTCHA --}}
-    <script src="https://www.google.com/recaptcha/api.js?render={{public_key}}"></script>
+   {{>partial_recaptcha_script_api}}
    {{>partial_loader_style}}
 </head>
 
@@ -44,7 +43,7 @@
 
                            </div>
                            <div class="modal-body">
-                              <form {{!id="form-signin"}} method="post" action="/login">
+                              <form method="post" action="/login">
                                  <input type="hidden" id="captcha" name="captcha">
                                  <input type="hidden" name="action" value="validate_captcha">
                                  <div class="input-group mb-3" >
@@ -99,55 +98,9 @@
    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
 
-   <script>
-      //$('#email').val('');
-      $('#password').val('');
-
-      grecaptcha.ready(function() {
-      // do request for recaptcha token
-      // response is promise with passed token
-         grecaptcha.execute('{{public_key}}', { action: 'validate_captcha' }).then(function(token) {
-               // add token value to form
-               document.getElementById('captcha').value = token;
-         });
-      });
-      
-      $("#form-signin").submit(function (event) {
-         event.preventDefault();
-         runCaptcha();
-      });
-
-      function runCaptcha() {
-         grecaptcha.execute('{{public_key}}', { action: '/login' }).then(function (token) {
-               const email = $('#email').val();
-               const password = $('#password').val();
-               const captcha = token;
-               sendData(email, password, captcha);
-         });
-      };
-
-      function sendData(email, password, captcha) {
-         const info = JSON.stringify({ email: email, password: password,captcha: captcha });
-         $.ajax({
-            url: '/login',
-            type: 'post',
-            data: info,
-            headers: {
-               'Accept': 'application/json, text/plain, */*',
-               'Content-Type': 'application/json'
-            },
-            dataType: 'json',
-            success: function (data) {               
-               //window.location.href = '/dashboard';
-               console.log(data);
-            }
-            /*error: function(XMLHttpRequest, textStatus, errorThrown) {               
-               //window.location.href = '/login';
-            }*/
-         });       
-      }
-   </script>
+   {{>partial_recaptcha_script_js}}
    {{>partial_loader_script}}
+   {{>partial_alert_script_js}}
 </body>
 <script>
    $(document).ready(function () {
