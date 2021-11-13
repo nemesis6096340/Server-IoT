@@ -12,7 +12,7 @@ const validationCheck = function (req, res, next) {
 
 validatorCtrl.validator = function (method) {
     switch (method) {
-        case 'createUser': {
+        case 'updateUser': {
             return [
                 body('userName', 'El usuario no existe').exists(),
                 body('email', 'Invalid email').exists().isEmail(),

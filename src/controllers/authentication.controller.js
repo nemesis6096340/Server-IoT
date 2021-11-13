@@ -17,36 +17,23 @@ authenticationCtrl.renderLogin = function (req, res, next) {
     else
         res.render('login.hbs', { layout: false, public_key: captcha.public });
 }
-
 authenticationCtrl.Login = passport.authenticate('local.signin', {
     successRedirect: '/dashboard',
     failureRedirect: '/login',
     failureFlash: true
 });
 
-authenticationCtrl.Logout = function (req, res) {
-    req.logOut();
-    req.flash("success", "You are logged out now.");
-    res.redirect('/login');
+authenticationCtrl.renderSignup = function(req, res){
+    let {access} = req.body;
+    res.render('authenticate/signup', {layout:false});
 }
+authenticationCtrl.Signup = passport.authenticate('local.signup', {
+    successRedirect: '/dashboard',
+    failureRedirect: '/login',
+    failureFlash: true
+});
 
-authenticationCtrl.Signin = async function (req, res) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-
-
-
-    /*
-    const { email, password } = req.body;
-    // req.session.my_variable = 'Hello World!';
-    req.session.user_data = { email, password };
-    req.flash('success', 'Now You are Registered')
-    res.redirect('/profile');*/
-};
-
-authenticationCtrl.Signup = async function (req, res) {
+authenticationCtrl.AccessRequest = async function (req, res) {
     let {email} = req.body;
     let users = await pool.query('select * from db_UsuariosySesiones.usuarios;');
     let access_requests = await pool.query('select * from db_UsuariosySesiones.solicitudes;');
@@ -74,6 +61,19 @@ authenticationCtrl.Signup = async function (req, res) {
     return res.redirect(`/login?email=${email}`);
 }
 
+authenticationCtrl.Logout = function (req, res) {
+    req.logOut();
+    req.flash("success", "You are logged out now.");
+    res.redirect('/login');
+}
+
+authenticationCtrl.renderForgot = function(req, res){
+    let {access} = req.body;
+    res.render('authenticate/forgot', {layout:false});    
+}
+authenticationCtrl.Forgot = function(req, res){
+}
+
 authenticationCtrl.register = function (req, res) {
     const { email, password } = req.body;
     // req.session.my_variable = 'Hello World!';
@@ -82,7 +82,7 @@ authenticationCtrl.register = function (req, res) {
     res.redirect('/profile');
 };
 
-authenticationCtrl.profile = function (req, res) {
+authenticationCtrl.renderProfile = function (req, res) {
     // console.log(req.session.my_variable);
     const user = req.session.user_data;
     delete req.session.user_data;
@@ -90,6 +90,22 @@ authenticationCtrl.profile = function (req, res) {
     res.render('profile', {
         user
     });
+};
+
+authenticationCtrl.Signin = async function (req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+
+
+    /*
+    const { email, password } = req.body;
+    // req.session.my_variable = 'Hello World!';
+    req.session.user_data = { email, password };
+    req.flash('success', 'Now You are Registered')
+    res.redirect('/profile');*/
 };
 
 export default authenticationCtrl;

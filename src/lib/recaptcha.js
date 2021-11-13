@@ -18,7 +18,7 @@ export const reCaptcha = function (req, res, next) {
         }
         body = JSON.parse(body);
         if (!body.success || body.score < 0.4) {
-            req.flash("error", "Tiempo agotado para la conexión.");
+            req.flash("error", "Tiempo agotado para la conexión, inténtalo de nuevo.");
             return res.redirect('/');
         }
         //console.log("reCaptcha");
