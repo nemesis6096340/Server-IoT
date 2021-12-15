@@ -4,6 +4,9 @@ import passport from "passport";
 import request from "request";
 import config from "../config.js";
 import { body } from "express-validator";
+
+import { sendMail } from "../lib/mailer.js";
+
 const { captcha } = config;
 
 
@@ -23,9 +26,9 @@ authenticationCtrl.Login = passport.authenticate('local.signin', {
     failureFlash: true
 });
 
-authenticationCtrl.renderSignup = function(req, res){
-    let {access} = req.body;
-    res.render('authenticate/signup', {layout:false});
+authenticationCtrl.renderSignup = function (req, res) {
+    let { access } = req.body;
+    res.render('authenticate/signup', { layout: false });
 }
 authenticationCtrl.Signup = passport.authenticate('local.signup', {
     successRedirect: '/dashboard',
@@ -34,7 +37,7 @@ authenticationCtrl.Signup = passport.authenticate('local.signup', {
 });
 
 authenticationCtrl.AccessRequest = async function (req, res) {
-    let {email} = req.body;
+    let { email } = req.body;
     let users = await pool.query('select * from db_UsuariosySesiones.usuarios;');
     let access_requests = await pool.query('select * from db_UsuariosySesiones.solicitudes;');
 
@@ -67,11 +70,16 @@ authenticationCtrl.Logout = function (req, res) {
     res.redirect('/login');
 }
 
-authenticationCtrl.renderForgot = function(req, res){
-    let {access} = req.body;
-    res.render('authenticate/forgot', {layout:false});    
+authenticationCtrl.renderForgot = function (req, res) {
+    let { access } = req.body;
+    res.render('authenticate/forgot', { layout: false });
+    
+    let info = sendMail('hacarapi@cofar.com.bo', 'Recuperar contraseña.','Click aqui para recuperar su cotraseña.')
+    console.log(info);
 }
-authenticationCtrl.Forgot = function(req, res){
+
+authenticationCtrl.Forgot = function (req, res) {
+
 }
 
 authenticationCtrl.register = function (req, res) {

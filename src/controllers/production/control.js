@@ -2,6 +2,13 @@ import merge from "deepmerge";
 import app from "../../app.js";
 import pool from "../../database.js";
 import * as helpers from "../../lib/helpers.js";
+
+import schedule from 'node-schedule';
+
+var j = schedule.scheduleJob('* 1 * * *', function(){  // this for one hour
+    console.log('The answer to life, the universe, and everything!');
+});
+
 const links = {
     path: "/produccion/enlace",
 };
@@ -17,16 +24,14 @@ function load() {
     data.forEach(function (element) {
         element.data = JSON.parse(element.data);
     });
-    counters = data;
-    //console.log(counters);
+    counters = data;    
 
     const resultState = pool.querySync("select * from db_ControldeProduccion_V4.EstadosProduccion;");
     state = JSON.parse(JSON.stringify(resultState));
-    //console.log(state);    
 };
 
 function showData(counter) {
-    //console.log(JSON.stringify(counter));
+    console.log(JSON.stringify(counter));
     let output = {};
     let html = ''
     output.id = counter.id;
@@ -53,32 +58,32 @@ function showData(counter) {
 console.log(JSON.stringify(counters));
 console.log(JSON.stringify(state));
 
-
-
 const controlCtrl = {};
 
 controlCtrl.logger = function (req, res) {
     var data = JSON.parse(JSON.stringify(req.body));
-    //console.log(JSON.stringify(data));
+    console.log(JSON.stringify(data));
     var counter = counters.find(x => x.id === data.id);
+
     if (counter) {
         //TOTAL, RESET, LAP,  EVENT,  NEW,  START,  FINISH, RESTART
         if (data.hasOwnProperty('count') || data.hasOwnProperty('production') || data.hasOwnProperty('state')) {
 
-            //let counter = counters.find(x => x.id === data.id);
-            //if (counter) {
+            let counter = counters.find(x => x.id === data.id);
+            if (counter) {
                 counter.data = data;
-                showData(counter);
+                //showData(counter);
                 if (data.hasOwnProperty('count') && data.hasOwnProperty('speed')) {
                     pool.query("call db_ControldeProduccion_V4.actualizarConteoActual(?,?,?,?,?,?,?,?,?);",
                         [data.id, data.count.incr, data.count.total, data.count.previous, data.count.turn, data.count.hour, data.count.max, data.count.min, data.speed.machine]);
                 }
-            //}
+            }
             //res.status(200).send({ok:200}).send('\r\n');
             //console.log(counters.find(x => x.id === data.id).data);
         }
         if (data.hasOwnProperty('reset')) {
             console.log('[--- Conteo Turno --]');
+            data.reset.time = Math.floor(new Date().getTime()/1000.0);
             pool.query("call db_ControldeProduccion_V4.insertarConteoTurno(?,?,?);", [data.id, data.reset.time, data.reset.turn]);
             //counters.find(x => x.id === data.id).data.count.hres = data.reset.time;
             counter.data.count.hres = data.reset.time;
@@ -90,9 +95,11 @@ controlCtrl.logger = function (req, res) {
         if (data.hasOwnProperty('event')) {
             console.log('[--- Evento de Produccion --]');
             //console.log(data);
+            data.event.time = Math.floor(new Date().getTime()/1000.0);
             pool.query("call db_ControldeProduccion_V4.insertarEvento(?,?,?);", [data.id, data.event.time, data.event.state]);
             //counters.find(x => x.id === data.id).data.state.hreg = data.event.time;
             counter.data.state.hreg = data.event.time;
+            
             //counters.find(x => x.id === data.id).data.state.iest = data.event.state;
             counter.data.state.iest = data.event.state;
             app.get('io').emit('server:data', counters.find(x => x.id === data.id).data);
@@ -122,6 +129,7 @@ controlCtrl.logger = function (req, res) {
         if (data.hasOwnProperty('finish')) {
             console.log('[--- Finalizar Produccion--]');
             //console.log(data);
+            data.finish.time = Math.floor(new Date().getTime()/1000.0);
             pool.query("call db_ControldeProduccion_V4.finalizarProduccion(?,?,?);", [data.id, data.finish.ipro, data.finish.time]);
             //counters.find(x => x.id === data.id).production.ipro = data.finish.ipro;
             counter.production.ipro = data.finish.ipro;
@@ -131,6 +139,7 @@ controlCtrl.logger = function (req, res) {
         if (data.hasOwnProperty('restart')) {
             console.log('[--- Resetear Produccion--]');
             //console.log(data);
+            data.restart.ipro = Math.floor(new Date().getTime()/1000.0);
             pool.query("call db_ControldeProduccion_V4.resetearProduccion(?,?);", [data.id, data.restart.ipro]);
             //counters.find(x => x.id === data.id).production.ipro = data.restart.ipro;
             counter.production.ipro = data.restart.ipro;
@@ -145,7 +154,9 @@ controlCtrl.logger = function (req, res) {
     else {
         //console.log("No Existe");
     }
-
+    let output = JSON.stringify({time: Math.floor(new Date().getTime()/1000.0)});
+    console.log(output);
+    res.send(output+'\r\n');
 };
 
 controlCtrl.list = async function (req, res) {

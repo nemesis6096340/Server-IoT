@@ -1,5 +1,9 @@
 body {
-    background: linear-gradient(-45deg, var(--primary),var(--primary), var(--info), var(--success), var(--success), var(--secondary),  var(--gray), var(--white));
+    /*background: linear-gradient(-45deg, var(--primary),var(--primary), var(--info), var(--success), var(--success), var(--secondary),  var(--gray), var(--white));*/
+   /*background: linear-gradient(-45deg, #563D7C,	#473A5D,	#2C1451,#9275BE, #9D89BE);*/
+   /*background:#3C3F5F;*/
+   background: var(--gray);
+    /**/
     background-size: 400% 400%;
     animation: gradient 15s ease infinite;
     height: 100vh;
@@ -56,13 +60,24 @@ body {
 
  .modal-login {
     color: #636363;
-    width: 350px;
-    margin: 80px auto 0;
+    color: var(--gray-dark);
+    /*width: 320px;*/
+    margin: 40px auto 0;
  }
 
+.modal-dialog {
+   max-width: 370px;
+   max-height: 370px;
+   /*margin: 1rem auto;*/
+}
+
+.modal-body{
+   /*padding: auto 20px;*/
+   margin: auto 1rem;
+}
  .modal-login .modal-content {
     padding: 20px;
-    border-radius: 5px;
+    border-radius: 10px;
     border: none;
  }
 
@@ -74,8 +89,8 @@ body {
 
  .modal-login h4 {
     text-align: center;
-    font-size: 26px;
-    margin: 30px 0 -15px;
+    font-size: 24px;
+    margin: 30px 0 -20px;
  }
 
  .modal-login .form-control:focus {
@@ -99,13 +114,13 @@ body {
     border-color: #dee4e7;
     text-align: center;
     justify-content: center;
-    margin: 0 -20px -20px;
+    /*margin: 0 -20px -20px;*/
     border-radius: 5px;
     font-size: 13px;
  }
 
  .modal-login .modal-footer a {
-    color: #999;
+    color: var(--gray-dark);
  }
 
  .modal-login .avatar {
@@ -114,7 +129,7 @@ body {
     margin: 0 auto;
     left: 0;
     right: 0;
-    top: -70px;
+    top: -50px;
     width: 95px;
     height: 95px;
     border-radius: 50%;
@@ -128,7 +143,7 @@ body {
  .modal-login .avatar i {
     color: #fff;
     display: table-cell;
-    vertical-align: middle;
+    /*vertical-align: middle;*/
     text-align: center;
     margin: auto;
     display: block;

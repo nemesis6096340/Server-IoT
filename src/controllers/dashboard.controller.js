@@ -1,7 +1,16 @@
+//import {getLocations} from '../models/locations.js'
+import Facilities from "../models/facilities.js";
+const facilities = new Facilities();
+
 const dashboardCtrl = {};
 
-dashboardCtrl.monit = function(req, res) {
-    res.render('dashboard.hbs');
+const navigate = {dashoard:true};
+
+dashboardCtrl.monit = async function(req, res) {
+    const zonas = await facilities.getTreeLocations();
+    //console.log(zonas);
+    //console.log(req.user.id);
+    res.render('dashboard/index.hbs', {zonas, navigate});
 };
 
 export default dashboardCtrl;

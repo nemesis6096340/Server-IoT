@@ -1,9 +1,16 @@
 import mysql from "mysql";
 import syncMysql from 'sync-mysql';
 import { promisify } from "util";
-import config from "./config.js";
 
-const { db } = config;
+
+const db = {
+  connectionLimit: 10,
+  host: '192.168.70.254',
+  user: 'cofarIND',
+  password: 'cofarIND.2014',
+  port: 1217,
+  database: 'db_termoHigrometriaNET_v3',
+}
 
 const pool = mysql.createPool(db);
 var connectionSync = new syncMysql(db);
@@ -19,7 +26,6 @@ pool.getConnection((err, connection) => {
     if (err.code === "ECONNREFUSED") {
       console.error("Database connection was refused");
     }
-    throw error;
   }
 
   if (connection) connection.release();

@@ -1,6 +1,12 @@
-<div class="container-fluid">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light justify-content-between p-2">
-        <a class="navbar-brand" href="#">LOGO</a>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bd-navbar justify-content-between p-2">
+        <a class="navbar-brand" href="#">
+            <span>
+                <i class="fa fa-cloud mx-1"></i>
+                Online
+            </span>
+            
+        </a>
 
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -8,43 +14,67 @@
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
 
-            <ul class="nav nav-tabs nav-fill ml-auto">
+            <ul class="nav nav-tabs nav-fill btn btn-block ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link active" href="#">DASHBOARD</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" href="#">DATALOGGER</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" href="#">PRODUCCION</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" href="#">BUS DE CAMPO</a>
-                </li>                
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="/instalaciones" id="mnuInstalaciones" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        INSTALACIONES
+                    <a class="nav-link {{#if navigate.dashboard}}active{{/if}}" href="/dashboard">
+                        <span>
+                            <i class="fa fa-chart-pie mx-1"></i>
+                            DASHBOARD
+                        </span>
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="mnuInstalaciones">
-                        <a class="dropdown-item" href="/instalaciones/equipos">Equipos</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="/instalaciones/infraestructuras">Infraestructuras</a>
-                    </div>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link {{#if navigate.datalogger}}active{{/if}}" href="#">
+                        <span>
+                            <i class="fa fa-chart-area mx-1"></i>
+                            TERMOHIGROMETRIA
+                        </span>                        
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{#if navigate.production}}active{{/if}}" href="/produccion">
+                        <span>
+                            <i class="fa fa-clock mx-1"></i>
+                            PRODUCCION
+                        </span>   
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{#if navigate.capture}}active{{/if}}" href="#">
+                        <span>
+                            <i class="fa fa-inbox mx-1" aria-hidden="true"></i>
+                            BUS DE CAMPO
+                        </span>
+                    </a>
+                </li>
+                <!--li class="nav-item">
+                    <a class="nav-link {{#if navigate.facilities}}active{{/if}}" href="/instalaciones">
+                        <span>
+                            <i class="fa fa-industry mx-1"></i>
+                            INSTALACIONES
+                        </span> 
+                    </a>
+                </li-->
             </ul>
 
             <div>
                 {{#if user}}
-                <div class="dropdown ml-auto">
-                    <button class="btn btn-block btn-secondary dropdown-toggle" type="button" id="dropdownLogin" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <div class="dropdown ml-auto active">
+                    <button class="btn btn-block btn-outline-light dropdown-toggle" type="button" id="dropdownLogin" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="fa fa-fw fa-user-circle"> </i>
                         {{user.email}}
                     </button>
-                    <div class="dropdown-menu dropdown-menu-fill dropdown-menu-right" aria-labelledby="dropdownLogin">
-                        <button class="btn btn-block dropdown-item" type="button">Action</button>
-                        <button class="btn btn-block dropdown-item" type="button">Another action</button>
+                    <div class="dropdown-menu dropdown-menu-fill dropdown-menu-right w-100 " aria-labelledby="dropdownLogin">
+                        {{#if user.email}}
+                        <a class="btn btn-block dropdown-item" href="/administrar">
+                            Administrar                            
+                        </a>
                         <div class="dropdown-divider"></div>
-                        <a class="btn btn-block dropdown-item" href="/logout"><i class="fa fa-sign-out" aria-hidden="true"></i>Cerrar Sesión</a>
+                        {{/if}}
+                        <a class="btn btn-block dropdown-item" href="/profile">Mi perfil</a>
+                        <a class="btn btn-block dropdown-item " href="/notify">Notificaciones  <span class="badge badge-warning">9</span></a>                        
+                        <div class="dropdown-divider"></div>
+                        <a class="btn btn-block dropdown-item" href="/logout">Cerrar Sesión</a>
                     </div>
                 </div>
                 {{else}}
@@ -144,4 +174,3 @@
                 </div>
             </div>
         </div-->
-</div>

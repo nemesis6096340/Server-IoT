@@ -31,7 +31,7 @@
             }
         }
         else {
-            $("#guardar").attr('disabled', JSON.stringify(infraestructura) === JSON.stringify(instalaciones.infraestructura));
+            $("#guardar").attr('disabled', JSON.stringify(infraestructura) === JSON.stringify(instalaciones.infraestructura) || infraestructura.detalle ==="" || infraestructura.ambiente ===""|| infraestructura.pisonivel ==="");
         }
     };
 
@@ -48,20 +48,20 @@
         });
 
         loadAmbiente();
-        let indexAmbiente = instalaciones.ambiente.findIndex(x => x.ambiente === infraestructura.ambiente);
+        let indexAmbiente = instalaciones.ambiente.findIndex(x => x.codigo === infraestructura.ambiente);
         $("#ambiente").val(indexAmbiente);
         $("#ambiente").on('change', function (event) {
             let pos = parseInt(event.target.value);
-            infraestructura.ambiente = instalaciones.ambiente[pos].ambiente;
+            infraestructura.ambiente = instalaciones.ambiente[pos].codigo;
             updateCodigo();
         });
 
         loadPisoNivel();
-        let indexPisoNivel = instalaciones.pisonivel.findIndex(x => x.pisonivel === infraestructura.pisonivel);
+        let indexPisoNivel = instalaciones.pisonivel.findIndex(x => x.codigo === infraestructura.pisonivel);
         $("#pisonivel").val(indexPisoNivel);
         $("#pisonivel").on('change', function (event) {
             let pos = parseInt(event.target.value);
-            infraestructura.pisonivel = instalaciones.pisonivel[pos].pisonivel;
+            infraestructura.pisonivel = instalaciones.pisonivel[pos].codigo;
             updateCodigo();
         });
 
@@ -72,11 +72,12 @@
         });
 
         loadPlanta();
-        $("#planta").prop('disabled', infraestructura.actualizar);
-        let indexArea = instalaciones.area.findIndex(x => x.area === infraestructura.area);
+        //$("#planta").prop('disabled', infraestructura.actualizar);
+        $("#planta").prop('disabled', true);
+        let indexArea = instalaciones.area.findIndex(x => x.codigo === infraestructura.area);
         let indexPlanta = -1;
         if (indexArea != -1)
-            indexPlanta = instalaciones.planta.findIndex(x => x.planta === instalaciones.area[indexArea].planta);
+            indexPlanta = instalaciones.planta.findIndex(x => x.codigo === instalaciones.area[indexArea].planta);
         loadArea(indexPlanta);
         $("#planta").val(indexPlanta);
         $("#planta").on('change', function (event) {
@@ -86,7 +87,8 @@
             updateCodigo();
         });
 
-        $('#area').prop('disabled', infraestructura.actualizar);
+        //$('#area').prop('disabled', infraestructura.actualizar);
+        $('#area').prop('disabled', true);
         $("#area").val(indexArea);
         $("#area").on('change', function (event) {
             let index = parseInt(event.target.value);
@@ -103,21 +105,21 @@
     function loadAmbiente() {
         $("#ambiente").empty();
         for (let i = 0; i < instalaciones.ambiente.length; i++) {
-            $("#ambiente").append('<option value=' + i + '>' + instalaciones.ambiente[i].descripcion + '</option>');
+            $("#ambiente").append('<option value=' + i + '>' + instalaciones.ambiente[i].detalle + '</option>');
         }
     };
 
     function loadPisoNivel() {
         $("#pisonivel").empty();
         for (let i = 0; i < instalaciones.pisonivel.length; i++) {
-            $("#pisonivel").append('<option value=' + i + '>' + instalaciones.pisonivel[i].descripcion + '</option>');
+            $("#pisonivel").append('<option value=' + i + '>' + instalaciones.pisonivel[i].detalle + '</option>');
         }
     };
 
     function loadPlanta() {
         $("#planta").empty();
         for (let i = 0; i < instalaciones.planta.length; i++) {
-            $("#planta").append('<option value=' + i + '>' + instalaciones.planta[i].descripcion + '</option>');
+            $("#planta").append('<option value=' + i + '>' + instalaciones.planta[i].detalle + '</option>');
         }
     };
 
@@ -125,8 +127,8 @@
         $("#area").empty();
         if (index != -1) {
             for (let i = 0; i < instalaciones.area.length; i++) {
-                if (instalaciones.area[i].planta == instalaciones.planta[index].planta) {
-                    $("#area").append('<option value=' + i + '>' + instalaciones.area[i].descripcion + '</option>');
+                if (instalaciones.area[i].planta == instalaciones.planta[index].codigo) {
+                    $("#area").append('<option value=' + i + '>' + instalaciones.area[i].detalle + '</option>');
                 }
             }
             $("#area").val(-1);

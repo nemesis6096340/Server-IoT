@@ -9,7 +9,7 @@
             var content = '';
             areas = data
             for (let i = 0; i < areas.length; i++) {
-                content += ('<div class="card mb-3 my-2"><div class="card-header text-white bg-info">' + areas[i].area + '</div><div class="card-body card bg-light" id=area' + i + '></div>');
+                content += ('<div class="card mb-3 my-2"><div class="card-header">' + areas[i].area + '</div><div class="card-body card bg-light" id=area' + i + '></div>');
             }
             $("#pnlProduccion").html(content);
         });

@@ -1,1 +1,43 @@
-<h1>Dashboard!</h1>
+
+<div class="container-fluid">
+    <div id="tabs-plant">
+        <ul>
+            {{#each zonas.plantas}}
+            <li><a href="#tabs-plant-{{codigo}}">{{descripcion}}</a>
+                <ul class="dropdown-menu">
+                    {{#each areas}}
+                    <li><a href="#section-{{codigo}}">{{descripcion}}</a></li>
+                    {{/each}}
+                </ul>
+            </li>
+            {{/each}}
+        </ul>
+
+        {{#each zonas.plantas}}
+        <div id="tabs-plant-{{codigo}}">
+            {{#each areas}}
+            <section id="section-{{codigo}}" class="jumbotron jumbotron-fluid p-4">
+                <div class="container-fluid">
+                    <h3 class="Heading-2">{{descripcion}}</h3>
+                    <p class="">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+                    <hr class="my-4">
+                    <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
+                    <p class="lead">
+                        <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
+                    </p>
+                </div>
+            </section>
+            {{/each}}
+        </div>
+        {{/each}}
+    </div>
+</div>
+
+<footer class="bg-success text-white text-center text-lg-start fixed-bottom">
+    <div class="container-fluid">
+        <!--div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2)"-->
+
+
+        <!--/div-->
+    </div>
+</footer>

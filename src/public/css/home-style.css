@@ -26,7 +26,8 @@ a, a:focus, a:hover {
 html,
 body {
     height: 100%;
-    background-color:var(--blue);
+    /*background-color:var(--primary);*/
+    background: var(--gray-dark);
 }
 
 body {

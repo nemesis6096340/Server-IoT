@@ -1,55 +1,124 @@
 import pool from "../../database.js";
 
-const db_name ="db_EquiposeInfraestructura_V1";
+import Facilities from "../../models/facilities.js";
+
+const facilities = new Facilities();
 
 const links = {
-    path: "/instalaciones/infraestructuras",
+    path: "/administrar/instalaciones/infraestructuras",
     add: "/agregar",
     edit: "/editar",
     update: "/modificar",
     delete: "/eliminar",
     save: "/guardar",
-    plant:"/plantas",
-    areas:"/areas"    
+    plant: "/plantas",
+    areas: "/areas"
 };
+
+const navigation = {
+    path: "instalaciones"
+
+};
+
+const navigate = { facilities: true };
+
 const infrastructureCtrl = {};
 
-infrastructureCtrl.plant = async function (req, res) {    
-    console.log(req.session);
-    let plant = JSON.parse(JSON.stringify(await pool.query("call mostrarPlantas();")));
-    res.render('facilities/infrastructure/plants.hbs', { plant: plant[0] });
+infrastructureCtrl.plant = async function (req, res) {
+    let plant = facilities.list_plants();
+    res.render('admin/facilities/infrastructure/plants.hbs', { plant, navigate });
 }
+
+
 
 infrastructureCtrl.area = async function (req, res) {
     let { plant } = req.query;
-    const instalaciones = {}
-    let areas = JSON.parse(JSON.stringify(await pool.query("call mostrarAreas(?);", [plant])));    
-    res.render('facilities/infrastructure/areas.hbs', { areas: areas[0] });
+    let areas = facilities.list_areas(plant);
+
+    let breadcrumb = `
+    <ul class="breadcrumb">
+        <span><i class="fa fa-tasks mx-2"></i></span>
+        <li class="breadcrumb-item">
+            <a href="/administrar" class="text-primary">Administrar</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="/administrar/instalaciones" class="text-primary">Instalaciones</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="/administrar/instalaciones/infraestructuras" class="text-primary">Infraestructuras</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="/administrar/instalaciones/infraestructuras/plantas" class="text-primary">Plantas</a>
+        </li>
+        <li class="breadcrumb-item">
+            ${facilities.plants.find(x => x.codigo === plant).detalle}            
+        </li>
+    </ul>`
+
+    res.render('admin/facilities/infrastructure/areas.hbs', { areas, navigate, breadcrumb });
 }
 
 infrastructureCtrl.location = async function (req, res) {
     let { area } = req.query;
-    const instalaciones = {};
-    let result = JSON.parse(JSON.stringify(await pool.query("call listarInfraestructuras(?);", [area])));
 
-    instalaciones.infraestructuras = result[0];
-    console.log(instalaciones);
+    const instalaciones = {};
+    let breadcrumb = `
+    <ul class="breadcrumb">
+        <span><i class="fa fa-tasks mx-2"></i></span>
+        <li class="breadcrumb-item">
+            <a href="/administrar" class="text-primary">Administrar</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="/administrar/instalaciones" class="text-primary">Instalaciones</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="/administrar/instalaciones/infraestructuras" class="text-primary">Infraestructuras</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="/administrar/instalaciones/infraestructuras/plantas" class="text-primary">Plantas</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="/administrar/instalaciones/infraestructuras/plantas/areas?plant=${facilities.areas.find(x => x.codigo === area).planta}" class="text-primary">
+                ${facilities.plants.find(x => x.codigo === facilities.areas.find(x => x.codigo === area).planta).detalle}
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            ${facilities.areas.find(x => x.codigo === area).detalle}
+        </li>
+    </ul>`
+
+
+
+    instalaciones.infraestructuras = facilities.list_locations(area);
     instalaciones.area = area;
+
     links.redirect = req.originalUrl;
-    let file_name = ''.concat(instalaciones.infraestructuras[0].planta," - ",instalaciones.infraestructuras[0].area);
-    console.log(JSON.stringify({'fileName': file_name}));
-    let file_export_options = JSON.stringify({'fileName': file_name});
-    res.render('facilities/infrastructure/list.hbs', { instalaciones, links, file_export_options });
+
+    let file_name = ''.concat(instalaciones.infraestructuras[0].planta, " - ", instalaciones.infraestructuras[0].area);
+    let file_export_options = JSON.stringify({ 'fileName': file_name });
+    res.render('admin/facilities/infrastructure/list.hbs', { instalaciones, links, file_export_options, navigate, breadcrumb, area });
 }
 
 infrastructureCtrl.list = async function (req, res) {
     const instalaciones = {}
-    let result = JSON.parse(JSON.stringify(await pool.query("call listarInfraestructuras(?);",['%'])));
-    //console.log(result.warningCount);    
-    instalaciones.infraestructuras = result[0];
-    links.redirect = req.originalUrl;    
-    console.log(links);  
-    res.render('facilities/infrastructure/list.hbs', { instalaciones, links });    
+    let breadcrumb = `
+    <ul class="breadcrumb">
+        <span><i class="fa fa-tasks mx-2"></i></span>
+        <li class="breadcrumb-item">
+            <a href="/administrar" class="text-primary">Administrar</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="/administrar/instalaciones" class="text-primary">Instalaciones</a>
+        </li>
+        <li class="breadcrumb-item"  class="text-primary">
+            Infraestructuras
+        </li>
+    </ul>`
+    instalaciones.infraestructuras = facilities.list_locations();
+
+    links.redirect = req.originalUrl;
+    //console.log(links);
+    res.render('admin/facilities/infrastructure/list.hbs', { instalaciones, links, navigate, breadcrumb });
 };
 
 infrastructureCtrl.add = async function (req, res) {
@@ -59,29 +128,32 @@ infrastructureCtrl.add = async function (req, res) {
         border: "border-success"
     };
 
+    let { area } = req.query;
+    //console.log(area);
     const instalaciones = {};
+
+    instalaciones.planta = JSON.parse(JSON.stringify(facilities.plants));
+    instalaciones.area = JSON.parse(JSON.stringify(facilities.areas));
+
+    instalaciones.ambiente = JSON.parse(JSON.stringify(facilities.ambient));
+    instalaciones.pisonivel = JSON.parse(JSON.stringify(facilities.nivel));
+    instalaciones.infraestructuras = JSON.parse(JSON.stringify(facilities.list_locations(area)));
+
+    let codigo = facilities.getDataArea(area).ubicaciones;
+
+
     instalaciones.infraestructura = {
-        code: 0,
+        codigo: codigo + 1,
         detalle: "",
-        area: "",
+        area: area,
         ambiente: "",
         pisonivel: "",
         actualizar: false
     };
-    instalaciones.planta = JSON.parse(JSON.stringify(await pool.query("select * from plantas;")));
-    instalaciones.area = JSON.parse(JSON.stringify(await pool.query("select * from areas;")));
-    instalaciones.ambiente = JSON.parse(JSON.stringify(await pool.query("select * from ambientes;")));
-    instalaciones.pisonivel = JSON.parse(JSON.stringify(await pool.query("select * from niveles;")));
-    instalaciones.infraestructuras = JSON.parse(JSON.stringify(await pool.query("select * from infraestructuras;")));
-    //instalaciones.infraestructura.id=Math.max.apply(Math, instalaciones.infraestructuras.map(function (o) { return o.id; }))+1;
-    //console.log(instalaciones);
-    //console.log(instalaciones.infraestructuras);
-    //let i = Math.max.apply(Math, (instalaciones.infraestructuras.find(o => o.area==='CAL')).map(function (o) { return o.code; }))+1;
-    //let i = instalaciones.infraestructuras.filter(obj => obj.area ==='LNE')
-    //let i = Math.max.apply(Math, instalaciones.infraestructuras.filter(obj => obj.area ==='CAL').map(function (o) { return o.code; }))+1;
-    //console.log(i);
-     
-    res.render('facilities/infrastructure/edit.hbs', { instalaciones, links, card });
+
+    console.log(instalaciones.infraestructura);
+
+    res.render('admin/facilities/infrastructure/edit.hbs', { instalaciones, links, card, navigate });
 };
 
 infrastructureCtrl.edit = async function (req, res) {
@@ -92,86 +164,62 @@ infrastructureCtrl.edit = async function (req, res) {
         border: "border-info",
         return: ""
     };
-    let { edit } = req.query;    
+    let { edit } = req.query;
 
-    if (edit){
+    if (edit) {
 
-        let data={};
-        data.area = edit.match(/^(\D\D\D)/g)[0];
-        data.codigo = Number(edit.match(/(\d\d)/g)[0]);
-        
-        let result = await pool.query("select * from Infraestructuras where area=? and codigo=?;", [data.area,data.codigo]);
-        //console.log(result);
+        let data = {};
+        data.area = edit.match(/^(\D\D\D)/g)[0].trim();
+
+        data.codigo = Number(edit.match(/(\d\d)/g)[0].trim());
+        let location = facilities.getLocation(data.codigo, data.area);
         const instalaciones = {};
-        if (result.length > 0) {
-            instalaciones.infraestructura = JSON.parse(JSON.stringify(result[0]));
+        if (location) {            
+            instalaciones.infraestructura = JSON.parse(JSON.stringify(location));
             instalaciones.infraestructura.actualizar = true;
-            instalaciones.planta = JSON.parse(JSON.stringify(await pool.query("select * from plantas;")));
-            instalaciones.area = JSON.parse(JSON.stringify(await pool.query("select * from areas;")));
-            instalaciones.ambiente = JSON.parse(JSON.stringify(await pool.query("select * from ambientes;")));
-            instalaciones.pisonivel = JSON.parse(JSON.stringify(await pool.query("select * from niveles;")));
-            instalaciones.infraestructuras = JSON.parse(JSON.stringify(await pool.query("select * from infraestructuras where area=?;",[data.area])));
-            //console.log(instalaciones);              
-            console.log(links);        
-            res.render('facilities/infrastructure/edit.hbs', { instalaciones, links, card });
-        }    
+            instalaciones.planta = JSON.parse(JSON.stringify(facilities.plants));
+            instalaciones.area = JSON.parse(JSON.stringify(facilities.areas));
+            instalaciones.ambiente = JSON.parse(JSON.stringify(facilities.ambient));
+            instalaciones.pisonivel = JSON.parse(JSON.stringify(facilities.nivel));
+            instalaciones.infraestructuras = JSON.parse(JSON.stringify(facilities.list_locations(data.area)));
+            res.render('admin/facilities/infrastructure/edit.hbs', { instalaciones, links, card, navigate });
+        }
     }
-    
 };
 
 infrastructureCtrl.save = async function (req, res) {
     var infraestructura = JSON.parse(JSON.stringify(req.body.infraestructura));
 
     console.log(infraestructura);
-    if (infraestructura.codigo > 0 && infraestructura.codigo < 100 && infraestructura.area != "") {
-        let result = await pool.query("call agregarInfraestructura(?,?);", [infraestructura.codigo, infraestructura.area]);
-        if (result.affectedRows > 0) {
-            let result = await pool.query("call actualizarInfraestructura(?,?,?,?,?);", [infraestructura.codigo, infraestructura.area, infraestructura.detalle, infraestructura.ambiente, infraestructura.pisonivel]);
-            if (result.affectedRows > 0) res.send();
-            else res.sendStatus(500);
-        }
-        else res.sendStatus(500);
-    }
-    else res.sendStatus(500);
+
+    let result = await facilities.createLocation(infraestructura);
+    if (result)
+        res.sendStatus(200);
+    else
+        res.sendStatus(500);
 };
 
 infrastructureCtrl.update = async function (req, res) {
-    let areas = await pool.query("SELECT  * FROM db_EquiposeInfraestructura_V1.Area;");
-    let ambientes = await pool.query("SELECT  * FROM db_EquiposeInfraestructura_V1.tipoAmbiente;");
-    let pisoniveles = await pool.query("SELECT  * FROM db_EquiposeInfraestructura_V1.tipoPisoNivel;");
-
-    var infraestructura = JSON.parse(JSON.stringify(req.body.infraestructura));
-    //console.log(infraestructura);
-
-    let data={};
-    
-    let index_area = areas.findIndex(x => x.codigo === infraestructura.area);
-    let index_ambiente = ambientes.findIndex(x => x.codigo === infraestructura.ambiente);
-    let index_pisonivel = pisoniveles.findIndex(x => x.codigo === infraestructura.pisonivel);
-
-    if (index_area!=-1 && index_ambiente!=-1 && index_pisonivel!=-1){
-        data.codigo = Number(infraestructura.codigo);
-        data.detalle = infraestructura.detalle;
-        data.area = areas[index_area].id;
-        data.ambiente = ambientes[index_ambiente].id;
-        data.pisonivel = pisoniveles[index_pisonivel].id;
-        //console.log(data);
-
-        let result = await pool.query("call actualizarInfraestructura(?,?,?,?,?);", [data.codigo, data.area, data.detalle, data.ambiente, data.pisonivel]);
-        //console.log(result);
-        if (result.affectedRows > 0) 
-            res.sendStatus(200);
-        else 
-            res.sendStatus(500);
-    }
-    else 
+    let infraestructura = JSON.parse(JSON.stringify(req.body.infraestructura));
+    console.log(infraestructura);
+    let result = await facilities.updateLocation(infraestructura);
+    if (result)
+        res.sendStatus(200);
+    else
         res.sendStatus(500);
 };
 
 infrastructureCtrl.delete = async function (req, res) {
-    var { codigo, area } = JSON.parse(JSON.stringify(req.body));
-    let result = await pool.query("call eliminarInfraestructura(?,?);", [codigo, area]);
-    if (result.affectedRows > 0) res.send();
+    let { code } = JSON.parse(JSON.stringify(req.body));
+    let data = {};
+
+    data.area = code.match(/^(\D\D\D)/g)[0];
+    data.codigo = Number(code.match(/(\d\d)/g)[0]);
+    console.log(data);
+    let result = await facilities.deleteLocation(data.codigo, data.area);
+
+    if (result) res.send();
     else res.sendStatus(500).send('Ocurrio un error!');
 };
+
 export default infrastructureCtrl;

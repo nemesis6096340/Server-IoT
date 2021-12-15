@@ -13,18 +13,21 @@
     }
 </script>
 
-<ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="/instalaciones">Instalaciones</a></li>
-    <li class="breadcrumb-item active">Infraestructuras</li>
-</ol>
+
+{{{breadcrumb}}}
+
 
 <div id="toolbar">
-    <a id="add" class="btn btn-outline-success" href="{{links.path}}{{links.add}}">
+    {{#if area}}
+    <a id="add" class="btn btn-outline-primary" href="{{links.path}}{{links.add}}?area={{area}}">    
         <i class="fa fa-fw fa-plus-circle"></i> Agregar Nueva Infraestructura
-    </a>    
-    <a id="plant" class="btn btn-outline-success ml-auto" href="{{links.path}}{{links.plant}}">
-        <i class="fa fa-fw fa-industry"></i> Buscar por Planta..
     </a>
+    {{else}}
+    <a id="plant" class="btn btn-outline-primary ml-auto" href="{{links.path}}{{links.plant}}">
+        <i class="fa fa-fw fa-industry"></i> Listar por Planta...
+    </a>
+    {{/if}}    
+    
 </div>
 <div class="container-fluid">
     <table 
@@ -38,8 +41,9 @@
         data-toggle="table" data-locale="es-ES"
         {{!--data-url="json/data1.json" --}}
         data-toolbar="#toolbar"
-        {{!--data-search="true"
-        data-advanced-search="true"--}}
+        data-search="true"
+        data-advanced-search="true"
+        data-visible-search="true"
         data-show-refresh="true"
         data-show-toggle="false"
         data-show-fullscreen="true"
@@ -52,7 +56,9 @@
         data-sortable="true"
         data-minimum-count-columns="2"
         data-show-pagination-switch="true"
-        data-pagination="true"
+        {{#if area}}
+        data-pagination="true"        
+        {{/if}}
         data-id-field="codigo"
         data-page-list="[5, 10, 15, 20, all]"
         data-show-footer="false"
@@ -111,9 +117,8 @@
         );
     };
 
-    function eliminar(code, area) {
-        console.log(code);
-        console.log(area);
+    function eliminar(code) {
+        console.log(code);        
 
         $("#dialog").dialog({
             resizable: false,
@@ -124,7 +129,7 @@
             buttons: {
                 "Si": function () {
                     $.post('{{links.path}}{{links.delete}}', // url
-                        { 'code': code, 'area': area } // data to be submit
+                        { 'code': code } // data to be submit
                     ).done(function (data) {
                         window.location.href = {{{ json links.redirect }}};
                     }).fail(function () {
@@ -164,6 +169,7 @@
         '<div class="card col-10 col-md-6 p-0">',
             '<h5 class="card-header">'+data['codigo']+'</h5>',
             '<div class="card-body">',
+                '<h2 class="card-title text-center mb-1">'+data['nombre']+'</h2>',
                 '<h4 class="card-title text-center mb-1">'+data['area']+'</h4>',
                 '<h6 class="card-subtitle text-center text-muted mb-2">'+data['planta']+'</h6>',
                 
@@ -171,20 +177,15 @@
                 '<p class="card-text text-center">'+data['ambiente']+'</p>',
             '</div>',
             '<div class="card-footer text-right">',
-                //'<form  class="form-inline" onsubmit="return false;">',
-                    //'<label class="form-control" for="id">Código</label>',
-                    //'<input class="form-control text-center" type="text" id="id" name="id" disabled value="' + codigo + '">',
-
                     '<a class="btn btn-outline-info mx-1" href="{{links.path}}{{links.edit}}?edit=' + data['codigo'] + '">',
                         '<i class="fa fa-fw fa-edit"></i>',
                         'Editar',
                     '</a>',
 
-                    '<button class="btn btn-outline-danger mx-1" onClick="eliminar(' + data['codigo'] + ')">',
+                    '<button class="btn btn-outline-danger mx-1" onClick="eliminar(' +`'${data['codigo']}'` + ')">',
                     '<i class="fa fa-fw fa-trash"></i>',
                     'Eliminar',
                     '</button>',
-                //'</form>',
             '</div>',
         '</div>',
         '</div>'

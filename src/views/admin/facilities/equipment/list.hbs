@@ -9,6 +9,7 @@
     }
 </script>
 
+{{{breadcrumb}}}
 
 <div id="toolbar">
     <a id="add-Equipo" class="btn btn-outline-success" href="{{links.path}}{{links.add}}">
@@ -36,7 +37,9 @@
         data-sortable="true"
         data-minimum-count-columns="2"
         data-show-pagination-switch="true"
-        data-pagination="true"
+        {{#if area}}
+        data-pagination="true"        
+        {{/if}}
         data-id-field="id"
         data-page-list="[5, 10, 15, 20, all]"
         data-show-footer="false"

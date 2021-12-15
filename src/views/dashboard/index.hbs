@@ -1,0 +1,46 @@
+<style type="text/css">
+.container-fluid .breadcrumb {
+  overflow: hidden;    
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.container-fluid .breadcrumb li {
+  display: inline;
+}
+
+</style>
+
+    <!-- Breadcrumb -->
+    <!--ul class="breadcrumb px-1 py-0 my-0">
+        <li class="breadcrumb-item mx-2">
+            <a href="/dashboard" data-abc="true" class="text-primary text-decoration-none">
+                <i class="fa fa-chart-pie"></i>
+                Dashboard
+            </a>
+        </li>
+    </ul-->
+    <ul class="breadcrumb" data-toggle="modal" data-target="#modal-find-zone">
+        <span>
+            <i class="fa fa-industry mx-2"></i>
+        </span>
+        <li class="breadcrumb-item">
+            Planta El Alto
+        </li>
+        <li class="breadcrumb-item">
+            Almacén de Materia Prima anexo El Alto
+        </li>
+        <li class="breadcrumb-item">
+            Recepcion de Materia Prima
+        </li>
+    </ul>
+
+    <div class="jumbotron jumbotron-fluid p-2 mb-0">
+        <div class="p-0 m-0" >
+            <h4 class="Heading-2 mb-0">Recepcion de Materia Prima</h4>      
+        </div>
+        <hr class="my-1">
+    </div>
+    
+{{> modal-find-zone_body}}

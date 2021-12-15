@@ -25,5 +25,10 @@ export default {
     captcha:{
         public: process.env.V3_PUBLIC,
         private: process.env.V3_PRIVATE
+    },
+
+    mailer:{
+        user : process.env.MAILER_USER,
+        password : process.env.MAILER_PASS,        
     }
 };

@@ -1,0 +1,35 @@
+<ul class="breadcrumb" data-toggle="modal" data-target="#modal-find-zone">
+    <span>
+        <i class="fa fa-tasks mx-2"></i>
+    </span>
+    <li class="breadcrumb-item">
+        <a href="/administrar" class="text-primary">Administrar</a>
+    </li>
+    <li class="breadcrumb-item">
+        Instalaciones
+    </li>
+</ul>
+
+
+
+<div class="container-fluid">
+    <div class="card-deck m-4">
+        <div class="card my-2" style="min-width: 18rem; max-width: 20rem;">
+            <!--div class="card-header">{{detalle}}</div-->
+            <div class="card-body">
+                <h4 class="card-title">Infraestructuras</h4>
+                <h6 class="card-subtitle mb-2 text-muted">Total Infraestructuras</h6>
+                <h1 class="text-center"><a href="/administrar/instalaciones/infraestructuras"><span class="badge text-success">{{total.locations}}</span></h1></a>
+            </div>
+        </div>
+
+        <div class="card my-2" style="min-width: 18rem; max-width: 20rem;">
+            <!--div class="card-header">{{detalle}}</div-->
+            <div class="card-body">
+                <h4 class="card-title">Equipos</h4>
+                <h6 class="card-subtitle mb-2 text-muted">Total Equipos</h6>
+                <h1 class="text-center"><a href="/administrar/instalaciones/equipos"><span class="badge text-success">{{total.equipments}}</span></h1></a>
+            </div>
+        </div>
+    </div>
+</div>

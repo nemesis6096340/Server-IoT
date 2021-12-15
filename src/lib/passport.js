@@ -4,8 +4,8 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 
 import pool from "../database.js";
-import * as helpers from "./helpers.js";
-
+/*import * as helpers from "./helpers.js";*/
+import * as crypto from "./crypto.js";
 import config from "../config.js";
 const { captcha } = config;
 
@@ -26,20 +26,21 @@ passport.use(
             console.log(index_user);
             if (index_user !== -1) {
                 const user = users[index_user];
-                const match = await helpers.matchPassword(password, user.password);
+                const match = await crypto.matchPassword(password, user.password);
                 if (match) {
                     console.log("Success Login.");
                     return done(null, user, req.flash('success', 'Bienvenido ' + user.username));
                 } else {
                     console.log('Incorrect Password');
-                    return done(null, false, req.flash('message', 'La contraseña no es correcta, inténtalo de nuevo.'));
+                    return done(null, false, req.flash('message', 'Tu correo electrónico o contraseña es incorrecta. Inténtalo nuevamente.'));
                 }
             } else {
                 console.log("User don't exists.");           
                 return done(
                     null,
                     false,
-                    req.flash('message', 'El usuario no existe.')
+                    //req.flash('message', 'Tu correo electrónico o contraseña es incorrecta. Inténtalo nuevamente.')
+                    req.flash('message', 'Tu correo electrónico no existe o es incorrecto. Inténtalo nuevamente.')
                 );
             }
         }
@@ -63,7 +64,7 @@ passport.use(
                 password
             };
             /*
-            newUser.password = await helpers.encryptPassword(password);
+            newUser.password = await crypto.encryptPassword(password);
             // Saving in the Database
             const result = await pool.query('INSERT INTO users SET ? ', newUser);
             newUser.id = result.insertId;
