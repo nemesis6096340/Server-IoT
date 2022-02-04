@@ -1,0 +1,87 @@
+<ul class="breadcrumb">
+    <span><i class="fa fa-tasks mx-2"></i></span>
+    <li class="breadcrumb-item">
+        <a href="/produccion" class="text-primary">Produccion</a>
+    </li>    
+</ul>
+<div class="container">
+    <div class="row mx-2" id="count{{data.id}}">
+        <div class="col-12">
+            <img src="/img/{{data.code}}.png" class="img-fluid img-thumbnail mx-auto d-block">            
+            <p style="font-size: 10px; text-align: center;">{{data.equipment}}</p>
+        </div>
+        <div class="col-12">
+            <div class="row">
+                
+                <div class="input-group input-group-sm col-md-6 mb-3 ">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" style="width: 6.5rem ;" id="addon-lote">LOTE   </span>
+                    </div>
+                    <!--a href="/produccion/lote?id={{data.ipro}}"-->
+                        <input class="form-control" style="background:#FFF;" id="lblLOTE" readonly="" value="{{data.lote}}" aria-describedby="addon-lote" />
+                    <!--/a-->
+                </div>
+
+                <div class="input-group input-group-sm col-md-6 mb-3">
+                    <div class="input-group-prepend"> 
+                        <span class="input-group-text"style="width: 6.5rem;" id="addon-hini">HORA INICIO</span>
+                    </div>
+                    <input class="form-control" style="background:#FFF;" id="lblHINICIO" readonly="" value="{{data.hini}}" />
+                </div>
+            
+            </div>
+            <div class="row">
+                <div class="form-group col-md-4 ">
+                    <label for="name" class="control-label m-0" style="font-size: 11px; color: #FFF; background: #418183;  width: 100%; height:17px; text-align: center;">TOTAL PRODUCIDO</label>
+                    <input class="form-control" style="font-size: 23px; background:#FFF; width: 100%;  height:30px; text-align: center;" id="lblTOTAL" readonly="" value="{{data.data.count.total}}" />
+                    <small id="holdTOTAL" class="form-text text-muted m-0 text-right" ></small>
+                </div>
+                <div class="form-group col-md-4 ">
+                    <label for="name" class="control-label m-0" style="font-size: 11px; color: #FFF; background: #410083; width: 100%; height:17px; text-align: center;">TOTAL PROD. TURNO</label>
+                    <input class="form-control" style="font-size: 23px; background:#FFF; width:100%; height:30px; text-align: center;" id="lblTURNO" readonly="" value="{{data.data.count.turn}}" />
+                    <small id="holdTURNO" class="form-text text-muted m-0 text-right" ></small>
+                </div>
+                <div class="form-group col-md-4 ">
+                    <label for="name" class="control-label m-0" style="font-size: 11px; color: #FFF; background: #FF8141; width: 100%; height:17px; text-align: center;">TOTAL PROD. HORA</label>
+                    <input class="form-control" style="font-size: 23px; background:#FFF; width:100%; height:30px; text-align: center;" id="lblPARCIAL" readonly="" value="{{data.data.count.hour}}" />
+                    <small id="holdPARCIAL" class="form-text text-muted m-0 text-right" ></small>
+                </div>
+
+            </div>
+        </div>
+        <div class="col-2"></div>
+        <div class="col-12 col-md-8">
+            <div class="form-group mb-0">
+                <label for="name" class="control-label" style="font-size: 11px; color: #858585; height:17px;">ESTADO ACTUAL</label>
+                <input class="form-control" style="font-size: 23px; width:100%; height:50px; text-align: center;" id="lblESTADO" readonly="" value="{{data.status}}" />
+                <small id="holdESTADO" class="form-text text-muted m-0 text-right" >{{data.hreg}}</small>
+            </div>
+        </div>
+        <div class="col-2"></div>
+    </div>
+</div>
+
+<div class="container">
+    <table
+        id="tblLote"
+        class="table table-sm mt-4">
+    <thead>
+        <tr>
+        <th scope="col">LOTE</th>
+        <th scope="col">HORA INICIO</th>
+        <th scope="col">HORA FINALIZO</th>
+        <th scope="col">TOTAL PRODUCIDO</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each lotes}}
+        <tr>
+            <th scope="row"><a href="/produccion/lote?id={{ipro}}">{{lote}}</a></th>
+            <td>{{hini}}</td>
+            <td>{{hfin}}</td>
+            <td>{{total}}</td>
+        </tr>
+        {{/each}}     
+    </tbody>
+    </table>
+</div>

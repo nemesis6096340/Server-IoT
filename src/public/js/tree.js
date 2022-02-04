@@ -3,8 +3,8 @@ $.fn.extend({
         
         /*var openedClass = 'glyphicon-minus-sign';
         var closedClass = 'glyphicon-plus-sign';*/
-        var openedClass = 'fa fa-minus-square ';
-        var closedClass = 'fa fa-plus-square';
+        var openedClass = 'fa fa-folder-open';
+        var closedClass = 'fa fa-folder';
 
         if (typeof o != 'undefined') {
             if (typeof o.openedClass != 'undefined') {
@@ -39,6 +39,20 @@ $.fn.extend({
         });
         //fire event to open branch if the li contains an anchor instead of text
         tree.find('.branch>a').each(function () {
+            /*$(this).on('click', function (e) {
+                $(this).closest('li').click();
+                e.preventDefault();
+            });*/
+        });
+        //fire event to open branch if the li contains an anchor instead of text
+        tree.find('.branch>input').each(function () {
+            $(this).on('click', function (e) {
+                console.log($(this)[0].id);
+            });
+            
+        });
+        //fire event to open branch if the li contains an anchor instead of text
+        tree.find('.branch>label').each(function () {
             $(this).on('click', function (e) {
                 $(this).closest('li').click();
                 e.preventDefault();

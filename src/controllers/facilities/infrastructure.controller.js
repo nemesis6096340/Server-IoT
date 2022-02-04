@@ -1,6 +1,7 @@
 import pool from "../../database.js";
 
 import Facilities from "../../models/facilities.js";
+import {updateURLParameter} from "../../lib/helpers.js";
 
 const facilities = new Facilities();
 
@@ -28,8 +29,6 @@ infrastructureCtrl.plant = async function (req, res) {
     let plant = facilities.list_plants();
     res.render('admin/facilities/infrastructure/plants.hbs', { plant, navigate });
 }
-
-
 
 infrastructureCtrl.area = async function (req, res) {
     let { plant } = req.query;
@@ -115,10 +114,9 @@ infrastructureCtrl.list = async function (req, res) {
         </li>
     </ul>`
     instalaciones.infraestructuras = facilities.list_locations();
-
+    let {search} = req.query;    
     links.redirect = req.originalUrl;
-    //console.log(links);
-    res.render('admin/facilities/infrastructure/list.hbs', { instalaciones, links, navigate, breadcrumb });
+    res.render('admin/facilities/infrastructure/list.hbs', { instalaciones, links, navigate, breadcrumb, search });
 };
 
 infrastructureCtrl.add = async function (req, res) {
@@ -156,6 +154,8 @@ infrastructureCtrl.add = async function (req, res) {
     res.render('admin/facilities/infrastructure/edit.hbs', { instalaciones, links, card, navigate });
 };
 
+
+
 infrastructureCtrl.edit = async function (req, res) {
     //console.log(req.headers.referer);
     let card = {
@@ -164,15 +164,22 @@ infrastructureCtrl.edit = async function (req, res) {
         border: "border-info",
         return: ""
     };
-    let { edit } = req.query;
-
+    let { edit, search } = req.query;
+    console.log(edit);
+    console.log(search);
+    if(search){
+        //if(!links.redirect.search('search'))
+        links.redirect = updateURLParameter(links.redirect,'search',search);
+            //links.redirect +=((links.redirect.split('?')[1] ? '&':'?') +'search='+search);
+    }
+    console.log(links.redirect);
     if (edit) {
-
         let data = {};
         data.area = edit.match(/^(\D\D\D)/g)[0].trim();
 
         data.codigo = Number(edit.match(/(\d\d)/g)[0].trim());
         let location = facilities.getLocation(data.codigo, data.area);
+        
         const instalaciones = {};
         if (location) {            
             instalaciones.infraestructura = JSON.parse(JSON.stringify(location));
@@ -181,7 +188,7 @@ infrastructureCtrl.edit = async function (req, res) {
             instalaciones.area = JSON.parse(JSON.stringify(facilities.areas));
             instalaciones.ambiente = JSON.parse(JSON.stringify(facilities.ambient));
             instalaciones.pisonivel = JSON.parse(JSON.stringify(facilities.nivel));
-            instalaciones.infraestructuras = JSON.parse(JSON.stringify(facilities.list_locations(data.area)));
+            instalaciones.infraestructuras = JSON.parse(JSON.stringify(facilities.list_locations(data.area)));            
             res.render('admin/facilities/infrastructure/edit.hbs', { instalaciones, links, card, navigate });
         }
     }

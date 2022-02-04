@@ -19,28 +19,35 @@ app.set('port', 3001);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.get('/enlaceJSON',async function (req, res) {
+app.get('/enlaceJSON', async function (req, res) {
 
     let { result } = req.query;
     console.log(result);
     let data = await decodificarQuery(result);
     //console.log(data);
-    res.end(data.replaceAll('T04:00:00.000Z',''));    
+    res.end(data.replaceAll('T04:00:00.000Z', ''));
 });
 
 app.post('/enlaceJSON', async function (req, res) {
-/*
-    let { result } = req.query;
-
-    console.log(result);
-    let data = await decodificarQuery(result);
-    //console.log(data);
-    res.end(data.replaceAll('T04:00:00.000Z',''));
-    //console.log(find.settings.filter);    
-    */
-   console.log(req.body);
-   res.end();
+    /*
+        let { result } = req.query;
+    
+        console.log(result);
+        let data = await decodificarQuery(result);
+        //console.log(data);
+        res.end(data.replaceAll('T04:00:00.000Z',''));
+        //console.log(find.settings.filter);    
+        */
+    console.log(req.body);
+    res.end();
 });
+
+app.get('/datalogger', async function (req, res) {
+    let { id, temperatura, humedad } = req.query;
+    console.log(req.query);
+    res.end();
+});
+
 app.listen(app.get("port"), function () {
     console.log("Server on port", app.get("port"));
 });
@@ -137,66 +144,66 @@ async function verificarParametros(_id, _comando, _parametro) {
                     result = await pool.query("call mostrarUbicacionSensor();");
                     result = JSON.parse(JSON.stringify(result));
                     output = JSON.stringify(result[0]);
-                    break;                    
+                    break;
                 case "GDMO":
-                    result = await pool.query("call getDataloggerMonitoreo(?);",_STID);
+                    result = await pool.query("call getDataloggerMonitoreo(?);", _STID);
                     result = JSON.parse(JSON.stringify(result));
                     output = JSON.stringify(result[0]);
                     break;
-                
+
                 case "GDME":
                     //getDataloggerMediciones($_STID, $_HREG, $_FREC);
                     //console.log("call getDataloggerMediciones(?,?,?);",[_STID,_HREG,60]);
-                    result = await pool.query("call getDataloggerMediciones(?,?,?);",[_STID,_HREG,_FREC]);
+                    result = await pool.query("call getDataloggerMediciones(?,?,?);", [_STID, _HREG, _FREC]);
                     result = JSON.parse(JSON.stringify(result));
                     output = JSON.stringify(result[0]);
                     break;
                 case "GAGG":
                     //getAggregateMediciones($_STID, $_HREG, $_FREC);
-                    result = await pool.query("call getAggregateMediciones(?,?,?);",[_STID,_HREG,_FREC]);
+                    result = await pool.query("call getAggregateMediciones(?,?,?);", [_STID, _HREG, _FREC]);
                     result = JSON.parse(JSON.stringify(result));
                     output = JSON.stringify(result[0]);
-                    break;				
+                    break;
                 case "GAGR":
                     //getAggregateReporte($_STID, $_HINI, $_HFIN, $_FREC);
-                    result = await pool.query("call getAggregateReporte(?,?,?,?);",[_STID, _HINI, _HFIN, _FREC]);
+                    result = await pool.query("call getAggregateReporte(?,?,?,?);", [_STID, _HINI, _HFIN, _FREC]);
                     result = JSON.parse(JSON.stringify(result));
                     output = JSON.stringify(result[0]);
                     break;
                 case "GDRE":
                     //getDataloggerReporte($_STID, $_HINI, $_HFIN, $_FREC);
-                    result = await pool.query("call getDataloggerReporte(?,?,?,?);",[_STID, _HINI, _HFIN, _FREC]);
+                    result = await pool.query("call getDataloggerReporte(?,?,?,?);", [_STID, _HINI, _HFIN, _FREC]);
                     result = JSON.parse(JSON.stringify(result));
                     output = JSON.stringify(result[0]);
                     break;
                 case "GHRE":
                     //getHistorialReporte($_STID, $_HINI, $_HFIN, $_FREC);
-                    result = await pool.query("call getHistorialReporte(?,?,?,?);",[_STID, _HINI, _HFIN, _FREC]);
+                    result = await pool.query("call getHistorialReporte(?,?,?,?);", [_STID, _HINI, _HFIN, _FREC]);
                     result = JSON.parse(JSON.stringify(result));
                     output = JSON.stringify(result[0]);
                     break;
                 case "GALD":
-                    result = await pool.query("call getAlarmFechas(?);",_STID);
+                    result = await pool.query("call getAlarmFechas(?);", _STID);
                     result = JSON.parse(JSON.stringify(result));
                     output = JSON.stringify(result[0]);
                     break;
-            	
+
                 case "GALR":
                     //getAlarmMediciones($_STID, $_HINI, $_HFIN);
                     //getAlarmMediciones($_STID, $_HREG, $_FREC);
-                    result = await pool.query("call getAlarmMediciones(?,?,?);",[_STID, _HREG, _FREC]);
+                    result = await pool.query("call getAlarmMediciones(?,?,?);", [_STID, _HREG, _FREC]);
                     result = JSON.parse(JSON.stringify(result));
                     output = JSON.stringify(result[0]);
                     break;
-                
-/*
-                case "AJUS":					
-                    //getConfiguracionAjustes();
-                    result = await pool.query("call getConfiguracionAjustes();");
-                    result = JSON.parse(JSON.stringify(result));
-                    output = JSON.stringify(result[0]);
-                    break; 
-*/
+
+                /*
+                                case "AJUS":					
+                                    //getConfiguracionAjustes();
+                                    result = await pool.query("call getConfiguracionAjustes();");
+                                    result = JSON.parse(JSON.stringify(result));
+                                    output = JSON.stringify(result[0]);
+                                    break; 
+                */
                 /*
                 case "UPDT":					
                     updateConfiguracionAjustes($_STID, $_TMED, $_TRAN,$_ERRT,$_ERRH, $_MAXH,$_MINH,$_MAXT,$_MINT);

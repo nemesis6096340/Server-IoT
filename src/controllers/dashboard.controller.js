@@ -4,7 +4,7 @@ const facilities = new Facilities();
 
 const dashboardCtrl = {};
 
-const navigate = {dashoard:true};
+const navigate = {dashboard:true};
 
 dashboardCtrl.monit = async function(req, res) {
     const zonas = await facilities.getTreeLocations();

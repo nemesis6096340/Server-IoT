@@ -4,6 +4,7 @@ import { promisify } from "util";
 import config from "./config.js";
 
 const { db } = config;
+console.log(db);
 
 const pool = mysql.createPool(db);
 var connectionSync = new syncMysql(db);
@@ -19,7 +20,7 @@ pool.getConnection((err, connection) => {
     if (err.code === "ECONNREFUSED") {
       console.error("Database connection was refused");
     }
-    throw error;
+    throw err;
   }
 
   if (connection) connection.release();

@@ -1,0 +1,117 @@
+<div class="container-fluid">
+    <div id="pnlDatalogger" class="my-2">
+        {{#each dataloggers}}        
+        <div class="card mb-3 my-2">
+            <div class="card-header ">{{name}}</div>
+            
+            <div class="card-body card bg-light p-1" id={{code}}>
+            <div class="accordion" id="accordionData">
+                {{#each areas}}
+                <div class="card">
+                    <div class="card-header" id="heading{{code}}">
+                        <h6 class="card-title font-weight-light mb-0" data-toggle="collapse" data-target="#collapse{{code}}" aria-expanded="true" aria-controls="collapse{{code}}">
+                            {{name}}
+                        </h6>
+                    </div>
+                    <div id="collapse{{code}}" class="collapse show" aria-labelledby="heading{{code}}" data-parent="#accordionData">
+                        <ul class="list-group list-group-flush">
+                        {{#each locations}}
+                            <div class="card-body">
+                                <h6 class="card-title font-weight-bold">{{name}}</h6>
+                                <li class="list-group-item p-0">
+                                    <ul class="list-group list-group-flush">
+                                        {{#each sensors}}
+                                        <li class="list-group-item p-auto">                                                
+                                            <div class="row p-0 m-0">
+                                                <div class="col-12 col-xl-9 p-0">
+                                                    <div class="row p-0 m-0">
+                                                        <h6 class="col-12 font-weight-bold m-0">{{code}}</h6> 
+                                                        <small class="col-12 text-muted">{{name}}</small>
+                                                    </div>
+                                                    <div class="row p-0 m-0">
+                                                        <div class="col-12 col-sm-6 px-0">
+                                                            <div class="row p-0 m-0">
+                                                                <div class="col-6 col-md-7 col-lg-8 p-0 text-danger my-auto">                                                                
+                                                                    <p class="text-center m-0" style="font-weight: bolder;font-size: 4.5vw;">
+                                                                        <i aria-hidden="true" class="fa fa-thermometer-half"></i>
+                                                                        <span id="{{code}}-temp">22.9</span> °C
+                                                                    </p>
+                                                                </div>
+                                                                <div class="col-6 col-md-5 col-lg-4 p-0 my-auto">
+                                                                    <div class="row p-0 m-auto">
+                                                                        <div class="col-4 text-right p-0 mr-auto">Max :</div>
+                                                                        <div class="col-6 p-0 ml-auto">                                                            
+                                                                            <span id="{{code}}-tmax">16.5</span> °C
+                                                                        </div>                                                                        
+                                                                        <div class="col-4 text-right p-0 mr-auto">Min :</div>
+                                                                        <div class="col-6 p-0 ml-auto">
+                                                                            <span id="{{code}}-tmin">8.7</span> °C
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12 col-sm-6 px-0">
+                                                            <div class="row p-0 m-0">
+                                                                <div class="col-6 col-md-7 col-lg-8 p-0 text-info my-auto">
+                                                                    <p class="text-center m-0" style="font-weight: bolder;font-size: 4.5vw;">
+                                                                        <i aria-hidden="true" class="fa fa-tint"></i>
+                                                                        <span id="{{code}}-humd">59.6</span>%
+                                                                    </p>
+                                                                </div>
+                                                                <div class="col-6 col-md-5 col-lg-4 p-0 my-auto">
+                                                                    <div class="row p-0 m-auto">
+                                                                        <div class="col-4 text-right p-0 mr-auto">Max :</div>
+                                                                        <div class="col-6 p-0 ml-auto">                                                            
+                                                                            <span id="{{code}}-hmax">93.0</span>%
+                                                                        </div>
+                                                                        <div class="col-4 text-right p-0 mr-auto">Min :</div>
+                                                                        <div class="col-6 p-0 ml-auto">
+                                                                            <span id="{{code}}-hmin">23.0</span>%
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </div>                                                                                    
+                                                <div class="col p-0 m-auto">                                                    
+                                                    <div class="row p-0 m-0">
+                                                        <div class="col-12 col-md-4 col-xl-12 p-1 text-center">
+                                                            <a href="#" class="btn btn-outline-success btn-block px-0" data-toggle="tooltip" data-placement="bottom" title="Historico de Mediciones" style="font-size: 1.5w;">
+                                                                <span><i aria-hidden="true" class="fa fa-chart-line mx-1"></i></span>
+                                                                <span>Historico de Mediciones</span> 
+                                                            </a>
+                                                            
+                                                        </div>
+                                                        <div class="col-12 col-md-4 col-xl-12 p-1 text-center">
+                                                            <a href="#" class="btn btn-outline-success btn-block px-0" data-toggle="tooltip" data-placement="bottom" title="Historico de Alarmas" style="font-size: 1.5w;">
+                                                                <span><i aria-hidden="true" class="fa fa-exclamation-triangle"></i></span>
+                                                                <span>Historico de Alarmas</span> 
+                                                            </a>
+                                                        </div>
+                                                        <div class="col-12 col-md-4 col-xl-12 p-1 text-center">
+                                                            <a href="#" class="btn btn-outline-success btn-block px-0" data-toggle="tooltip" data-placement="bottom" title="Impresion de Reportes" style="font-size: 1.5w;">
+                                                                <span><i aria-hidden="true" class="fa fa-file"></i></span>
+                                                                <span>Impresion de Reportes</span> 
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        {{/each}}
+                                    </ul>
+                                </li>
+                            </div>
+                        {{/each}}
+                        </ul>
+                    </div>
+                </div>
+                {{/each}}                            
+            </div>          
+        </div>
+        {{/each}}
+    </div>
+</div>

@@ -1,10 +1,13 @@
 import pool from "../database.js";
 
 const db_name = "db_EquiposeInfraestructura_V1";
+const zeroPad = (num, places) => String(num).padStart(places, '0');
 
 class Facilities {
     plants = [];
     areas = [];
+    locations = [];
+
     ambient = [];
     nivel = [];
 
@@ -22,6 +25,15 @@ class Facilities {
         this.load_equipments();
     }
 
+    get_equipment_code(area, id){
+        let code = '';
+        code = code.concat(zeroPad(id / 1000,3));
+        if(id % 1000 !== 0)
+            code = code.concat(' ', id % 1000);
+        code = ''.concat(area, '-', code);
+        return code;
+    }
+
     async load_equipments() {
         this.type_class = JSON.parse(JSON.stringify(await pool.query(`select * from ${db_name}.ClasificacionPrimaria;`)));
         this.type_module = JSON.parse(JSON.stringify(await pool.query(`select * from ${db_name}.ClasificacionSecundaria;`)));
@@ -29,11 +41,22 @@ class Facilities {
         this.type_equipmet = JSON.parse(JSON.stringify(await pool.query(`select * from ${db_name}.TipodeEquipo;`)));
 
         this.equipments = JSON.parse(JSON.stringify(await pool.query(`select * from ${db_name}.Equipos;`)));
+        this.equipments.forEach(equipment => {
+            if(equipment.area){
+                let code = '';
+                code=code.concat(zeroPad(equipment.id / 1000,3));
+                if(equipment.id % 1000 !== 0)
+                    code=code.concat(' ', equipment.id % 1000);
+                equipment.codigo = ''.concat(equipment.area,'-',code);
+            } 
+        });
     }
 
     async load_infraestructures() {
         this.plants = JSON.parse(JSON.stringify(await pool.query(`select * from ${db_name}.plantas;`)));
         this.areas = JSON.parse(JSON.stringify(await pool.query(`select * from ${db_name}.areas;`)));
+        this.locations = JSON.parse(JSON.stringify(await pool.query(`select * from ${db_name}.ubicaciones;`)));
+
         this.ambient = JSON.parse(JSON.stringify(await pool.query(`select * from ${db_name}.ambientes;`)));
         this.nivel = JSON.parse(JSON.stringify(await pool.query(`select * from ${db_name}.niveles;`)));
 
@@ -53,7 +76,63 @@ class Facilities {
     }
 
     // EQUIPOS
+    list_equipments_by_plant(plant) {
+        let filter_equipment = this.equipments.filter(x => x.planta == plant);
+        return filter_equipment;
+    }
+    list_equipments_by_area(area) {
+        let filter_equipment = this.equipments.filter(x => x.area == area);
+        return filter_equipment;
+    }
+    list_equipments_by_zone(zone) {
+        let filter_equipment = this.equipments.filter(x => x.ubicacion == zone);
+        return filter_equipment;
+    }
 
+    // EQUIPMENT CRUD
+    async get_equipment_data(equipment){
+        let result_equipment = {};
+        let result = JSON.parse(JSON.stringify(await pool.query(`call ${db_name}.getDataEquipo(?);`, [equipment])));
+        
+        if(result[0][0]){
+            result_equipment = result[0][0];
+        }
+        return result_equipment;
+    }
+
+    async deleteEquipment(id){
+        if(Number.isInteger(Number(id))){
+            let result = await pool.query(`call ${db_name}.eliminarEquipo(?);`, [id]);
+            return (result.affectedRows >= 0);
+        } 
+        return false;
+    };
+
+
+    get_zone_data(code_zone){
+        let data = {};
+        data.area = code_zone.match(/^(\D\D\D)/g)[0].trim();
+        data.codigo = Number(code_zone.match(/(\d\d)/g)[0].trim());
+        return this.getLocation(data.codigo, data.area);
+    }
+
+    get_area_data(code_area){
+        return this.areas.find(x => x.codigo === code_area);
+    }
+
+    get_plant_data(code_planta){
+        return this.plants.find(x => x.codigo === code_planta);
+    }
+
+    get_area_by_zone(code_zone){        
+        let code_area = this.equipments.find(x=>x.ubicacion === code_zone).area;        
+        return this.areas.find(x => x.codigo === code_area);
+    }
+    
+    get_plant_by_area(code_area){
+        let code_plant = this.areas.find(x=>x.codigo === code_area).planta;
+        return this.plants.find(x=> x.codigo = code_plant);
+    }
 
     // INFRAESTRUCTURAS
 
@@ -112,12 +191,6 @@ class Facilities {
     async getTreeLocations() {
         let zonas = {};
         const infraestructuras = {};
-        /*
-        infraestructuras.plantas = JSON.parse(JSON.stringify(await pool.query("select * from db_EquiposeInfraestructura_v1.plantas;")));
-        infraestructuras.areas = JSON.parse(JSON.stringify(await pool.query("select * from db_EquiposeInfraestructura_v1.areas;")));
-        */
-        //infraestructuras.ubicaciones = JSON.parse(JSON.stringify(await pool.query("select * from db_EquiposeInfraestructura_v1.ubicaciones;")));
-
 
         infraestructuras.plantas = this.plants;
         infraestructuras.areas = this.areas;
@@ -125,20 +198,24 @@ class Facilities {
         //console.log(infraestructuras.ubicaciones);
         zonas.plantas = [];
         infraestructuras.plantas.forEach(function (planta) {
-            let { codigo, detalle } = planta;
+            let { codigo, detalle} = planta;
+            let total = planta.areas;
             let areas = [];
             infraestructuras.areas.forEach(function (area) {
                 if (area.planta === planta.codigo) {
                     let new_area = {};
                     new_area.codigo = area.codigo;
                     new_area.detalle = area.detalle;
+                    new_area.total = area.ubicaciones;
                     let ubicaciones = [];
+                    
                     infraestructuras.ubicaciones.forEach(function (ubicacion) {
                         let code_area = ubicacion.codigo.match(/^(\D\D\D)/g)[0].trim();
                         if (code_area === area.codigo) {
                             let new_ubicacion = {};
                             new_ubicacion.codigo = ubicacion.codigo;
                             new_ubicacion.detalle = ubicacion.nombre;
+                            //new_ubicacion.total = this.equipments.filter(x => x.ubicacion == ubicacion.codigo).length;
                             ubicaciones.push(new_ubicacion);
                         }
                     });
@@ -146,7 +223,7 @@ class Facilities {
                     areas.push(new_area);
                 }
             });
-            zonas.plantas.push({ codigo, detalle, areas });
+            zonas.plantas.push({ codigo, detalle, total, areas });
         });
         return zonas;
     }
@@ -232,6 +309,33 @@ class Facilities {
         }
         else return false;
     }
+
+
+
+    // VISTAS
+    generate_breadcrum_zone(code_zone){
+        let url_location='';        
+        let data_zone = this.get_zone_data(code_zone);
+        let data_area = this.get_area_by_zone(code_zone);
+        let data_plant = this.get_plant_by_area(data_area.codigo);
+        if(data_zone && data_area && data_plant){
+            url_location =
+            `<li class="breadcrumb-item">
+                <a href="/administrar/instalaciones/equipos" class="text-primary" >Equipos</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="/administrar/instalaciones/equipos?plant=${data_plant.codigo}" class="text-primary" data-toggle="tooltip" data-placement="bottom" title="${data_plant.detalle}">${data_plant.codigo}</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="/administrar/instalaciones/equipos?area=${data_area.codigo}" class="text-primary" data-toggle="tooltip" data-placement="bottom" title="${data_area.detalle}">${data_area.codigo}</a>
+            </li>
+            <li class="breadcrumb-item">
+                <label class="text-primary" data-toggle="tooltip" data-placement="bottom" title="${code_zone}">${data_zone.detalle}</label>
+            </li>`;
+        }
+        return url_location;
+    }
+
 };
 
 export default Facilities;

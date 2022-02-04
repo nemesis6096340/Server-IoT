@@ -4,20 +4,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import fs from 'fs';
 
-import modbus from 'modbus';
-import ModbusRTU from "modbus-serial";
-
-var client = new ModbusRTU();
-client.connectTCP("10.0.103.23", { port: 1024 });
-client.setID(12);
-
-setInterval(function() {
-    client.readHoldingRegisters(120, 12, function(err, data) {
-        console.log(data.data);
-    });
-}, 1000);
-
-const modbusIP = modbus('10.0.103.23',1024,12)
+import control  from "./controllers/production/control.js";
 
 // -> Path
 const __filename = fileURLToPath(import.meta.url);
@@ -25,15 +12,11 @@ const __dirname = dirname(__filename);
 
 const app = express();
 
-app.get('/counter', async function(req, res){
-    let counter = await modbusIP.read('hr120-132') ;
-    res.send(counter);
-})
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-//import control  from "../src/controllers/production/control.js";
-app.post('/produccion/enlace',function(req, res){
-    console.log(req.body);
-});
+app.post('/produccion/enlace', control.logger);
+
 // Settings
 app.set('port', 3002);
 

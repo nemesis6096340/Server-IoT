@@ -1,6 +1,8 @@
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
 <script>
+    var zonas = {{{ json zonas }}};
     function responseHandler(res) {
         $.each(res.rows, function (i, row) {
             row.state = $.inArray(row.id, selections) !== -1
@@ -10,72 +12,100 @@
 </script>
 
 {{{breadcrumb}}}
+{{> modal-find-zone_body}}
 
 <div id="toolbar">
-    <a id="add-Equipo" class="btn btn-outline-success" href="{{links.path}}{{links.add}}">
+    <a id="add-Equipo" class="btn btn-outline-primary" href="{{links.path}}{{links.add}}">
         <i class="fa fa-fw fa-plus-circle"></i> Agregar Nuevo Equipo
-    </a>
+    </a>    
 </div>
+
 <div class="container-fluid">
-    <table class="table table-condensed" {{!--class="table w-auto small" --}} {{!--class="table w-auto text-small" --}} 
+    <table 
+        class="table table-sm"
+        {{!--class="table table-condensed" --}} 
+        {{!--class="table w-auto small" --}}
+        {{!--class="table w-auto text-small" --}}
+        
+        {{!--data-show-custom-view="true"
+        data-custom-view="customViewFormatter"      --}}
         id="table"
         data-toggle="table"
         data-locale="es-ES"
-        {{!--data-url="json/data1.json" --}}
         data-toolbar="#toolbar"
         data-search="true"
         data-advanced-search="true"
+        data-visible-search="true"
         data-show-refresh="true"
+        
         data-show-toggle="true"
+        data-card-view="false"
+        {{!--data-card-formatter="customCardView"--}}
+
         data-show-fullscreen="true"
         data-show-columns="true"
         data-show-columns-toggle-all="true"
         data-detail-view="true"
         data-detail-formatter="detailFormatter"
         data-show-export="true"
-        data-click-to-select="true"        
+        {{!data-click-to-select="true"--}}
         data-sortable="true"
         data-minimum-count-columns="2"
         data-show-pagination-switch="true"
+        
+        data-search-accent-neutralise="true"
+        data-search-highlight = "true"
+        {{#if search}}
+        data-search-text = "{{search}}"
+        {{/if}}
         {{#if area}}
         data-pagination="true"        
         {{/if}}
-        data-id-field="id"
+        data-id-field="Codigo"
         data-page-list="[5, 10, 15, 20, all]"
         data-show-footer="false"
+
+        {{!--data-filter-control="true"
+        data-show-search-clear-button="true"--}}
         {{!--data-side-pagination="server"--}}
-        data-response-handler="responseHandler">
+        data-response-handler="responseHandler"
+        data-export-options= '{{ file_export_options }}'
+        data-export-types="['json', 'csv', 'txt', 'doc', 'xlsx']"
+        >
+
 
         <thead>
             <tr>
-                <th data-field="planta" data-sortable="true">Planta</th>
-                <th data-field="area" data-sortable="true">Area</th>
-                <th data-field="numero" data-sortable=" true">Numero</th>
-                <th data-field="gmp">GMP</th>
-                <th data-field="clase" data-sortable="true">Clase</th>
-                <th data-field="objeto">Objeto</th>
-                <th data-field="modulo" data-sortable="true" >Modulo</th>
-                <th data-field="elemento">Elemento</th>
-                <th data-field="caracteristicas">Características</th>
-                <th data-field="calibracion" data-sortable="true">Calibración</th>
-                <th data-field="ubicacion">Ubicación</th>
+                <th data-field="codigo" data-sortable="true">Codigo</th>
+                <th data-sortable="true"    data-filter-control="select"    data-field="planta">Planta</th>
+                <th data-sortable="true"    data-filter-control="select"    data-field="area">Area</th>
+                <th data-sortable="true"    data-filter-control="input"     data-field="numero">Numero</th>
+                <th data-sortable="false"   data-filter-control="select"    data-field="gmp">GMP</th>
+                <th data-sortable="true"    data-filter-control="select"    data-field="clase">Clase</th>
+                <th data-sortable="false"   data-filter-control="input"     data-field="objeto">Objeto</th>
+                <th data-sortable="true"    data-filter-control="select"    data-field="modulo">Modulo</th>
+                <th data-sortable="false"   data-filter-control="select"    data-field="elemento">Elemento</th>
+                <th data-sortable="false"   data-filter-control="input"    data-field="caracteristicas">Características</th>
+                <th data-sortable="true"    data-filter-control="select"    data-field="calibracion">Calibración</th>
+                <th data-sortable="true"    data-filter-control="select"    data-field="ubicacion">Ubicación</th>
             </tr>
         </thead>
 
         <tbody>
             {{#each instalaciones.equipos}}
             <tr>
-                <td>{{Planta}}</td>
-                <td>{{Area}}</td>
-                <td style="white-space: nowrap;">{{Numero}}</td>
-                <td>{{GMP}}</td>
-                <td>{{Clase}}</td>
-                <td>{{Objeto}}</td>
-                <td>{{Modulo}}</td>
-                <td>{{Elemento}}</td>
-                <td>{{Caracteristicas}}</td>
-                <td>{{Calibracion}}</td>
-                <td style="white-space: nowrap;">{{Ubicacion}}</td>
+                <td>{{codigo}}</td>
+                <td>{{planta}}</td>
+                <td>{{area}}</td>
+                <td style="white-space: nowrap;">{{id}}</td>
+                <td>{{gmp}}</td>
+                <td>{{clase}}</td>
+                <td>{{objeto}}</td>
+                <td>{{modulo}}</td>
+                <td>{{elemento}}</td>
+                <td>{{caracteristicas}}</td>
+                <td>{{calibracion}}</td>
+                <td style="white-space: nowrap;">{{ubicacion}}</td>
             </tr>
             {{/each}}
         </tbody>
@@ -90,11 +120,14 @@
     var selections = []
 
     function editar(id) {
-        console.log(id);
+        let search = $("div.bootstrap-table > div.fixed-table-toolbar > div.search > input.form-control").val();
+        if(!search) search ='';
+        window.location.href = "{{links.path}}{{links.edit}}?id="+id+"&search="+search;
     };
 
     function eliminar(id) {
         console.log(id);
+        let search = $("div.bootstrap-table > div.fixed-table-toolbar > div.search > input.form-control").val();
         $("#dialog").dialog({
             resizable: false,
             height: "auto",
@@ -104,7 +137,7 @@
             buttons: {
                 "Si": function () {
                     $.post('{{links.path}}{{links.delete}}', // url
-                        { 'id': id } // data to be submit
+                        { 'id': id, 'search':search} // data to be submit
                     ).done(function (data) {
                         window.location.href = '{{links.path}}';
                     }).fail(function () {
@@ -123,24 +156,32 @@
         $("#dialog").dialog("open");
     };
 
+    function customCardView(index, row) {
+        return [
+            '<div class="card card-bs">',
+                '<div class="head">',
+                '<span class="name">' + 'Joder 1' + '</span>',
+                '<span class="stars">★ ' +'Joder 2' + '</span>',
+                '<span class="forks">⑂ ' + 'Joder 3' + '</span>',
+            '</div>',
+            '<div class="body">' + 'Joder 4' + '</div>',
+            '</div>'
+        ].join('');
+    };
+
     function detailFormatter(index, row) {
         var html = []
         var indexs = 0
-        var id = 0, code = "";
-        const zeroPad = (num, places) => String(num).padStart(places, '0');
+        var id = 0, code = "", codigo="";
+        //const zeroPad = (num, places) => String(num).padStart(places, '0');
         $.each(row, function (key, value) {
             var columns = $("th:eq(" + (indexs + 1) + ")").data("field")
             if (columns != undefined) {
-                if (columns == 'area') {
-                    code += (row[columns] + " ");
+                if (columns == 'codigo') {
+                    codigo = row[columns];
                 }
                 if (columns == 'numero') {
                     id = parseInt(row[columns].replace(' ', ''), 10);
-                    if (id % 1000 == 0) {
-                        code += zeroPad(id / 1000, 3);
-                    }
-                    else
-                        code += (id);
                 }
                 indexs++;
             }
@@ -150,12 +191,16 @@
         html.push([
             '<form  class="form-inline" onsubmit="return false;">',
                 '<label class="form-control" for="code">Código</label>',
-                '<input class="form-control text-center" type="text" id="code" name="code" disabled value="' + code + '">',
+                '<input class="form-control text-center" type="text" id="code" name="code" disabled value="' + codigo + '">',
 
-                '<a class="form-control btn btn-outline-info mx-1" href="{{links.path}}{{links.edit}}?id=' + id + '">',
+                /*'<a class="form-control btn btn-outline-info mx-1" href="{{links.path}}{{links.edit}}?id=' + id + '">',
                     '<i class="fa fa-fw fa-edit"></i>',
                     'Editar',
-                '</a>',
+                '</a>',*/
+                '<button class="form-control btn btn-outline-info mx-1" onClick="editar(' + id + ')">',
+                    '<i class="fa fa-fw fa-edit"></i>',
+                    'Editar',
+                '</button>',
                 '<button class="form-control btn btn-outline-danger mx-1" onClick="eliminar(' + id + ')">',
                     '<i class="fa fa-fw fa-trash"></i>',
                     'Eliminar',

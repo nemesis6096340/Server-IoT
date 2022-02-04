@@ -22,6 +22,7 @@ passport.use(
         async function (req, email, password, done) {
             //console.log(req.body);
             let users = await pool.query('SELECT * FROM db_UsuariosySesiones.usuarios');
+            //let index_user = users.findIndex(x => x.email === email || x.email.match(/^[a-zA-Z0-9]{3,20}/g)[0] === email);
             let index_user = users.findIndex(x => x.email === email);
             console.log(index_user);
             if (index_user !== -1) {
@@ -86,5 +87,7 @@ passport.deserializeUser(
         let users = await pool.query('SELECT * FROM db_UsuariosySesiones.usuarios');
         let index_user = users.findIndex(x => x.id === id);
         done(null, users[index_user]);
+        //clear sessions
+        //return done(null, true);
     }
 );

@@ -74,8 +74,8 @@ authenticationCtrl.renderForgot = function (req, res) {
     let { access } = req.body;
     res.render('authenticate/forgot', { layout: false });
     
-    let info = sendMail('hacarapi@cofar.com.bo', 'Recuperar contraseña.','Click aqui para recuperar su cotraseña.')
-    console.log(info);
+    //let info = sendMail('hacarapi@cofar.com.bo', 'Recuperar contraseña.','Click aqui para recuperar su cotraseña.')
+    //console.log(info);
 }
 
 authenticationCtrl.Forgot = function (req, res) {

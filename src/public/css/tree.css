@@ -25,11 +25,12 @@
     padding:0 1em;
     line-height:2em;
     /*color:#369;*/
-    color:var(--info);
+    color:var(--primary);
     /*font-weight:700;*/
     
     position:relative
 }
+
 .tree ul li:before {
     content:"";
     display:block;
@@ -54,11 +55,19 @@
     text-decoration: none;
     /*color:#369;*/
     color:var(--gray-dark);
-    font-size: 17px;
+    /*font-size: 17px;*/
+    height: auto;
+}
+.tree li label {
+    text-decoration: none;
+    /*color:#369;*/
+    color:var(--gray-dark);
+    
     height: auto;
 }
 .tree li a:hover{
-    /*background:var(--primary);*/
+    border-bottom: 1px solid var(--primary);
+
     color:var(--info)
 }
 .tree li button, .tree li button:active, .tree li button:focus {

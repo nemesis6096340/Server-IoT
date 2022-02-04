@@ -13,13 +13,24 @@
           <div class="form-group">
             <ul id="tree1">
               {{#each zonas.plantas}}
-                <li><a href="#" id={{codigo}}>{{detalle}}</a>
+                <li>                  
+                  <!--input id="{{codigo}}" type="checkbox" /-->
+                  <label>{{detalle}}</label>
+                  <!--span class="badge bg-primary rounded-pill text-light" style="float:right; margin-top: 10px; width:30px;">{{total}}</span-->
+                  <a href="?plant={{codigo}}" class="badge bg-primary rounded-pill text-light" style="float:right; margin-top: 10px; width:30px;">{{total}}</a>
                   <ul>
                     {{#each areas}}
-                    <li><a href="#" id={{codigo}}>{{detalle}}</a>
+                    <li>
+                      <label>{{detalle}}</label>
+                      <a href="?area={{codigo}}" class="badge bg-primary rounded-pill text-light" style="float:right; margin-top: 10px; width:30px;">{{total}}</a>
                       <ul>
                         {{#each ubicaciones}}
-                        <li><a href="?zone={{codigo}}">{{detalle}}</a></li>
+                        <li>
+                          <!--input id="u-{{codigo}}" type="checkbox" />
+                          <label>{{detalle}}</label-->
+                          <a href="?zone={{codigo}}">{{detalle}}</a>
+                          <a class="badge bg-primary rounded-pill text-light" style="float:right; margin-top: 10px; width:30px;">{{total}}</a>
+                        </li>
                         {{/each}}
                       </ul>
                     </li>
@@ -33,7 +44,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary">Aceptar</button>
+        <button type="button" class="btn btn-primary" onClick="selectLocation()">Aceptar</button>
       </div>
     </div>
   </div>

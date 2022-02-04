@@ -3,19 +3,89 @@
 <script>
     $(function () {
         var socket = io();
-        var areas;
+        var areas = {{{ json areas }}};
+        var counters = {{{ json counters}}};
 
-        socket.on('server:areas', (data) => {
-            var content = '';
-            areas = data
-            for (let i = 0; i < areas.length; i++) {
-                content += ('<div class="card mb-3 my-2"><div class="card-header">' + areas[i].area + '</div><div class="card-body card bg-light" id=area' + i + '></div>');
-            }
-            $("#pnlProduccion").html(content);
-        });
+        showData();
 
-        socket.on('server:counters', function (counters) {
+        function showData(){
             for (let a = 0; a < areas.length; a++) {
+                var content ='<ul class="list-group">';
+                //var rows = '<li class="list-group-item">';
+                var rows='';
+                for (let c = 0; c < counters.length; c++) {
+                    if (areas[a].area == counters[c].area) {
+                        rows += (
+                            `
+                            <li class="list-group-item">
+                                <div class="row" id=count${counters[c].id}>
+                                    <div class="col-sm-3">
+                                        <a href="/produccion/contador?id=${counters[c].id}">
+                                            <img src="/img/${counters[c].code}.png" class="img-fluid img-thumbnail mx-auto d-block">
+                                        </a>
+                                        <p style="font-size: 10px; text-align: center;">${counters[c].equipment}</p>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="row">
+                                            <div class="input-group input-group-sm col-md-6  m-0 p-0">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="addon-lote">LOTE   </span>
+                                                </div>
+                                                <input class="form-control" style="background:#FFF;" id="lblLOTE" readonly="" value="${counters[c].data.production.lote.substring(0,7)}" aria-describedby="addon-lote" />
+                                            </div>
+
+                                            <div class="input-group input-group-sm col-md-6 m-0 p-0">
+                                                <div class="input-group-prepend">
+                                                    <label class="input-group-text" id="addon-hini">HORA INICIO</label>
+                                                </div>
+                                                <input class="form-control" style="background:#FFF;" id="lblHINICIO" readonly="" value="--:--:-- --/--/----" aria-describedby="addon-hini"/>
+                                            </div>
+                                            <div class="form-group col-md-4 m-0 p-0">
+                                                <label for="name" class="control-label m-0" style="font-size: 11px; color: #FFF; background: #418183;  width: 100%; height:17px; text-align: center;">TOTAL PRODUCIDO</label>
+                                                <input class="form-control" style="font-size: 23px; background:#FFF; width: 100%;  height:30px; text-align: center;" id="lblTOTAL" readonly="" value="${counters[c].data.count.total}" />
+                                                <small id="holdTOTAL" class="form-text text-muted m-0 text-right" ></small>
+                                            </div>
+                                            <div class="form-group col-md-4 m-0 p-0">
+                                                <label for="name" class="control-label m-0" style="font-size: 11px; color: #FFF; background: #410083; width: 100%; height:17px; text-align: center;">TOTAL PROD. TURNO</label>
+                                                <input class="form-control" style="font-size: 23px; background:#FFF; width:100%; height:30px; text-align: center;" id="lblTURNO" readonly="" value="${counters[c].data.count.turn}" />
+                                                <small id="holdTURNO" class="form-text text-muted m-0 text-right" ></small>
+                                            </div>
+                                            <div class="form-group col-md-4 m-0 p-0">
+                                                <label for="name" class="control-label m-0" style="font-size: 11px; color: #FFF; background: #FF8141; width: 100%; height:17px; text-align: center;">TOTAL PROD. HORA</label>
+                                                <input class="form-control" style="font-size: 23px; background:#FFF; width:100%; height:30px; text-align: center;" id="lblPARCIAL" readonly="" value="${counters[c].data.count.hour}" />
+                                                <small id="holdPARCIAL" class="form-text text-muted m-0 text-right" ></small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group mb-0">
+                                            <label for="name" class="control-label" style="font-size: 11px; color: #858585; height:17px;">ESTADO ACTUAL</label>
+                                            <input class="form-control" style="font-size: 23px; width:100%; height:50px; text-align: center;" id="lblESTADO" readonly="" value="SIN PRODUCCION" />
+                                            <small id="holdESTADO" class="form-text text-muted m-0 text-right" ></small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            `
+                            /*'<tr id=count' + counters[c].id + '>' +
+                            '<td>' + counters[c].code + '</td>' +
+                            '<td>' + counters[c].data.count.total + '</td>' +
+                            '<td>' + counters[c].data.production.lote.substring(0,7) + '</td>' +
+                            '<td>' + counters[c].data.count.turn + '</td>' +
+                            '<td>' + counters[c].data.count.hour + '</td>' +
+                            
+                            '<td>' + counters[c].data.state.iest + '</td>' +
+                            '</tr>'*/
+                        );
+                    }
+                }
+               // rows +="</li>";
+                content += (rows + '</ul>');
+                
+                //console.log(content);
+                $("#area" + a).html(content);
+            }
+            /*for (let a = 0; a < areas.length; a++) {
                 var content =
                     '<table table-condensed id=tblArea' + a + '>' +
                     '<thead>' +
@@ -35,9 +105,10 @@
                             '<tr id=count' + counters[c].id + '>' +
                             '<td>' + counters[c].code + '</td>' +
                             '<td>' + counters[c].data.count.total + '</td>' +
+                            '<td>' + counters[c].data.production.lote.substring(0,7) + '</td>' +
                             '<td>' + counters[c].data.count.turn + '</td>' +
                             '<td>' + counters[c].data.count.hour + '</td>' +
-                            '<td>' + counters[c].data.speed.machine + '</td>' +
+                            
                             '<td>' + counters[c].data.state.iest + '</td>' +
                             '</tr>'
                         );
@@ -46,21 +117,106 @@
                 content += (rows + '</tbody></table>');
                 //console.log(content);
                 $("#area" + a).html(content);
+            }*/
+        }
+        console.log(areas);
+        console.log(counters);
+        
+        socket.on('server:areas', (data) => {
+            console.log(data);
+            var content = '';
+            areas = data;
+            /*for (let i = 0; i < areas.length; i++) {
+                content += ('<div class="card mb-3 my-2"><div class="card-header">' + areas[i].area + '</div><div class="card-body card bg-light p-1" id=area' + i + '></div>');
             }
+            $("#pnlProduccion").html(content);*/
+        });
+
+        socket.on('server:counters', function (counters) {
+            this.counters = counters;
+            showData();            
         });
 
         socket.on('server:data', function (data) {
-            console.log(data.html);
-            $("#count" + data.id).html(data.html);
-            /*$("#count" + data.id).find('td:eq(1)').html(data.count.total);
-            $("#count" + data.id).find('td:eq(2)').html(data.count.hres);
-            $("#count" + data.id).find('td:eq(3)').html(data.count.hour);
-            $("#count" + data.id).find('td:eq(4)').html(data.speed.machine);
-            $("#count" + data.id).find('td:eq(5)').html(data.state.iest);*/
+            console.log(data);
+            $("#count" + data.id).find('#lblLOTE').val(data.lote);
+            $("#count" + data.id).find('#lblHINICIO').val(data.hini);
+            $("#count" + data.id).find('#lblTOTAL').val(data.total);
+            $("#count" + data.id).find('#lblTURNO').val(data.turn);
+            $("#count" + data.id).find('#lblPARCIAL').val(data.hour_current);
+            $("#count" + data.id).find('#lblESTADO').val(data.status);
+            if(data.speed != 0)
+                $("#count" + data.id).find('#holdTOTAL').html(`...velocidad maquina  ${data.speed}`);
+            $("#count" + data.id).find('#holdTURNO').html(data.hres);
+            if(data.hour != 0)
+                $("#count" + data.id).find('#holdPARCIAL').html(`...la hora anterior ${data.hour}`);
+            $("#count" + data.id).find('#holdESTADO').html(data.hreg);
         });
     });
 </script>
 
 <div class="container-fluid">
-    <div id="pnlProduccion" class="my-2"></div>
+    <div id="pnlProduccion" class="my-2">
+        {{#each areas}}
+        <div class="card mb-3 my-2">
+            <div class="card-header">{{area}}</div>
+            <div class="card-body card bg-light p-1" id=area{{@index}}></div>
+            <!--
+            {{#each counters}}
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="row" id=count{{id}}>
+                            <div class="col-sm-3">
+                                <a href="/produccion/contador?id={{id}}">
+                                    <img src="/img/{{code}}.png" class="img-fluid img-thumbnail mx-auto d-block">
+                                </a>
+                                <p style="font-size: 10px; text-align: center;">{{equipment}}</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="row">
+                                    <div class="input-group input-group-sm col-md-6  m-0 p-0">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="addon-lote">LOTE   </span>
+                                        </div>
+                                        <input class="form-control" style="background:#FFF;" id="lblLOTE" readonly="" value="{{data.production.lote}}" aria-describedby="addon-lote" />
+                                    </div>
+
+                                    <div class="input-group input-group-sm col-md-6 m-0 p-0">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text" id="addon-hini">HORA INICIO</label>
+                                        </div>
+                                        <input class="form-control" style="background:#FFF;" id="lblHINICIO" readonly="" value="--:--:-- --/--/----" aria-describedby="addon-hini"/>
+                                    </div>
+                                    <div class="form-group col-md-4 m-0 p-0">
+                                        <label for="name" class="control-label m-0" style="font-size: 11px; color: #FFF; background: #418183;  width: 100%; height:17px; text-align: center;">TOTAL PRODUCIDO</label>
+                                        <input class="form-control" style="font-size: 23px; background:#FFF; width: 100%;  height:30px; text-align: center;" id="lblTOTAL" readonly="" value="{{data.count.total}}" />
+                                        <small id="holdTOTAL" class="form-text text-muted m-0 text-right" ></small>
+                                    </div>
+                                    <div class="form-group col-md-4 m-0 p-0">
+                                        <label for="name" class="control-label m-0" style="font-size: 11px; color: #FFF; background: #410083; width: 100%; height:17px; text-align: center;">TOTAL PROD. TURNO</label>
+                                        <input class="form-control" style="font-size: 23px; background:#FFF; width:100%; height:30px; text-align: center;" id="lblTURNO" readonly="" value="{{data.count.turn}}" />
+                                        <small id="holdTURNO" class="form-text text-muted m-0 text-right" ></small>
+                                    </div>
+                                    <div class="form-group col-md-4 m-0 p-0">
+                                        <label for="name" class="control-label m-0" style="font-size: 11px; color: #FFF; background: #FF8141; width: 100%; height:17px; text-align: center;">TOTAL PROD. HORA</label>
+                                        <input class="form-control" style="font-size: 23px; background:#FFF; width:100%; height:30px; text-align: center;" id="lblPARCIAL" readonly="" value="{{data.count.hour}}" />
+                                        <small id="holdPARCIAL" class="form-text text-muted m-0 text-right" ></small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group mb-0">
+                                    <label for="name" class="control-label" style="font-size: 11px; color: #858585; height:17px;">ESTADO ACTUAL</label>
+                                    <input class="form-control" style="font-size: 23px; width:100%; height:50px; text-align: center;" id="lblESTADO" readonly="" value="SIN PRODUCCION" />
+                                    <small id="holdESTADO" class="form-text text-muted m-0 text-right" ></small>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            {{/each}}
+            -->
+        </div>
+        {{/each}}
+    </div>
 </div>

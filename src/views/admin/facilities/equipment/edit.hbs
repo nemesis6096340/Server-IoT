@@ -3,11 +3,11 @@
 <script>
     var instalaciones = {{{ json instalaciones }}};
     var equipo = Object.assign({}, instalaciones.equipo);
-
+    console.log(instalaciones);
     const zeroPad = (num, places) => String(num).padStart(places, '0');
 
     function updateCodigo() {
-        if (equipo.ubicacion === 0) $("#code-area").html("---");
+        if (equipo.ubicacion === '') $("#code-area").html("---");
         else $("#code-area").html(getArea(equipo.ubicacion));
         if(equipo.id % 1000 === 0) $("#code-sub").hide();
         else $("#sub").show();
@@ -44,7 +44,6 @@
     };
 
     function init() {
-
         updateCodigo();
         $("#guardar").attr('disabled', true);
         $("#id").val(equipo.id / 1000);
@@ -67,13 +66,13 @@
             updateCodigo();
         });
 
-        $("#calibracion").val(equipo.calibracion);
+        $("#calibracion").val(instalaciones.equipo.calibracion);
         $('#calibracion').change(function () {
             equipo.calibracion = parseInt($("#calibracion").val(), 10);
             updateCodigo();
         });
 
-        $("#tipo").val(equipo.tipo);
+        $("#tipo").val(instalaciones.equipo.tipo);
         $('#tipo').change(function () {
             equipo.tipo = parseInt($("#tipo").val(), 10);
             updateCodigo();
@@ -99,11 +98,21 @@
 
         loadPlanta();
         $("#planta").on('change', function (event) {
+            //console.log(event.target.value);
             loadArea(event.target.value);
             loadUbicacion(-1);
         });
 
-        let indexUbicacion = instalaciones.ubicacion.findIndex(x => x.id === equipo.ubicacion);
+        let data = {};
+        let indexUbicacion = -1;
+        if(equipo.ubicacion !== ''){
+            //data.area = equipo.ubicacion.match(/^(\D\D\D)/g)[0].trim();
+            //data.codigo = Number(equipo.ubicacion.match(/(\d\d)/g)[0].trim());
+            //indexUbicacion = instalaciones.ubicacion.findIndex(x => x.codigo === data.codigo && x.area === data.area);
+            indexUbicacion = instalaciones.ubicacion.findIndex(x => x.codigo === equipo.ubicacion);
+        }
+        
+        //let indexUbicacion = instalaciones.ubicacion.findIndex(x => x.id === equipo.ubicacion);
         if (indexUbicacion != -1) {
             let area = instalaciones.ubicacion[indexUbicacion].area;
             //console.log(area);
@@ -124,12 +133,13 @@
         }
 
         $("#area").on('change', function (event) {
+            //console.log(event.target.value);
             loadUbicacion(event.target.value);
         });
 
         $("#ubicacion").on('change', function (event) {
             let index = parseInt(event.target.value);
-            equipo.ubicacion = instalaciones.ubicacion[index].id;
+            equipo.ubicacion = instalaciones.ubicacion[index].codigo;
             updateCodigo();
         });
 
@@ -147,7 +157,7 @@
         $("#area").empty();
         if (index != -1) {
             for (let i = 0; i < instalaciones.area.length; i++) {
-                if (instalaciones.area[i].planta == instalaciones.planta[index].codigo) {
+                if (instalaciones.area[i].planta === instalaciones.planta[index].codigo) {
                     $("#area").append('<option value=' + i + '>' + instalaciones.area[i].detalle + '</option>');
                 }
             }
@@ -157,11 +167,13 @@
 
     function loadUbicacion(index) {
         $("#ubicacion").empty();
-        for (let i = 0; i < instalaciones.ubicacion.length; i++) {
-            if (instalaciones.ubicacion[i].area == instalaciones.area[index].codigo) {
-                $("#ubicacion").append('<option value=' + i + '>' + instalaciones.ubicacion[i].detalle + '</option>');
+        if(index != -1){
+            for (let i = 0; i < instalaciones.ubicacion.length; i++) {
+                if (instalaciones.ubicacion[i].area == instalaciones.area[index].codigo) {
+                    $("#ubicacion").append('<option value=' + i + '>' + instalaciones.ubicacion[i].detalle + '</option>');
+                }
             }
-        }
+        }        
         $("#ubicacion").val(-1);
     };
 
@@ -184,11 +196,10 @@
     };
 
     function getArea(ubicacion){
-        let area="";
-        let indexUbicacion = instalaciones.ubicacion.findIndex(x => x.id === ubicacion);
+        let area="";        
+        let indexUbicacion = instalaciones.ubicacion.findIndex(x => x.codigo === ubicacion);
         if (indexUbicacion != -1) {
-            area = instalaciones.ubicacion[indexUbicacion].area;
-            //console.log(area);
+            area = instalaciones.ubicacion[indexUbicacion].area;            
         }
         return area;
     }
@@ -226,7 +237,7 @@
                             $.post('{{links.path}}{{links.save}}',   // url
                                 { equipo } // data to be submit
                             ).done(function (data) {
-                                window.location.href = '{{links.path}}';
+                                window.location.href = {{{ json links.redirect }}};
                             }).fail(function () {
                                 alert('Ocurrio un error');
                             });
@@ -236,7 +247,7 @@
                             $.post('{{links.path}}{{links.update}}',   // url
                                 { equipo }
                             ).done(function (data) {
-                                window.location.href = '{{links.path}}';
+                                window.location.href = {{{ json links.redirect }}};
                             }).fail(function () {
                                 alert('Ocurrio un error');
                             });
@@ -257,7 +268,7 @@
 
         $("#cancelar").click(function () {
             if (JSON.stringify(equipo) === JSON.stringify(instalaciones.equipo)) {
-                location.href = "{{links.path}}";
+                window.location.href = {{{ json links.redirect }}};
             }
             else {
                 $("#dialog").dialog({
@@ -267,8 +278,8 @@
                     modal: true,
                     title: "Cancelar",
                     buttons: {
-                        "Si": function () {
-                            location.href = "{{links.path}}"
+                        "Si": function () {                            
+                            window.location.href = {{{ json links.redirect }}};
                         },
                         "No": function () {
                             $(this).dialog("close");
@@ -294,9 +305,9 @@
             {{card.title}}
         </div>
         <h1 class="card-title text-center my-4">
-            <span id="code-area" class="border font-weight-bold text-center text-monospace p-2 ">---</span>
-            <span id="code-id"   class="border font-weight-bold text-center text-monospace p-2 ">---</span>
-            <span id="code-sub"  class="border font-weight-bold text-center text-monospace p-2 ">---</span>            
+            <span id="code-area" class="border font-weight-bold text-center text-monospace p-2">---</span>
+            <span id="code-id"   class="border font-weight-bold text-center text-monospace p-2">---</span>
+            <span id="code-sub"  class="border font-weight-bold text-center text-monospace p-2">---</span>            
         </h1>
         <div class="card-body">
             <div class="row">

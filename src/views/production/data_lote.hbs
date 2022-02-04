@@ -1,0 +1,105 @@
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<link href="https://unpkg.com/bootstrap-table@1.19.1/dist/bootstrap-table.min.css" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.10.21/tableExport.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.10.21/libs/jsPDF/jspdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.10.21/libs/jsPDF-AutoTable/jspdf.plugin.autotable.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.19.1/dist/bootstrap-table.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.19.1/dist/extensions/export/bootstrap-table-export.min.js"></script>
+
+<div class="container">
+    <table class="table table-sm">
+        <thead>
+            <tr>            
+            </tr>
+        </thead>
+        <tbody>        
+        <tr>
+            <th scope="row">NUMERO DE LOTE :</th>
+            <td>{{produccion_datos.lote}}</td>            
+        </tr>
+        <tr>
+            <th scope="row">HORA INICIO :</th>
+            <td>{{produccion_datos.hini}}</td>            
+        </tr> 
+        <tr>
+            <th scope="row">HORA FINAL: </th>
+            <td>{{produccion_datos.hfin}}</td>            
+        </tr>      
+        </tbody>
+    </table>
+
+    <h4 class="text-center mt-4">PRODUCCION HORA</h4>
+
+    <table 
+        class="table table-sm"
+
+        id="tblProdHora" 
+        data-show-footer="true"
+        data-search="true"
+        data-show-export="true"        
+        data-show-columns="true"
+        data-export-options= '{{ file_export_options }}'
+        data-export-types="['json', 'csv', 'txt', 'doc', 'xlsx']"
+    >
+        <thead>
+            <tr>
+            <th scope="col">HORA REGISTRO</th>
+            <th scope="col">TOTAL PRODUCIDO</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each produccion_hora}}
+            <tr>
+                <th scope="row">{{hreg}}</th>
+                <td>{{total}}</td>            
+            </tr>
+            {{/each}}     
+        </tbody>        
+    </table>
+
+
+
+
+    <h4 class="text-center">PRODUCCION TURNO</h4>
+    <table id="tblLote" class="table table-sm">
+        <thead>
+            <tr>
+            <th scope="col">HORA REGISTRO</th>
+            <th scope="col">TOTAL PRODUCIDO</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each produccion_turno}}
+            <tr>
+                <th scope="row">{{hreg}}</th>
+                <td>{{total}}</td>            
+            </tr>
+            {{/each}}     
+        </tbody>        
+    </table>
+
+    <h4 class="text-center">PRODUCCION EVENTOS</h4>
+    <table id="tblLote" class="table table-sm">
+        <thead>
+            <tr>
+            <th scope="col">HORA REGISTRO</th>
+            <th scope="col">TOTAL PRODUCIDO</th>
+            <th scope="col">ESTADO PRODUCCION</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each produccion_eventos}}
+            <tr>
+                <th scope="row">{{hreg}}</th>
+                <td>{{total}}</td>
+                <td>{{state}}</td>
+            </tr>
+            {{/each}}     
+        </tbody>
+    </table>
+    
+</div>
+

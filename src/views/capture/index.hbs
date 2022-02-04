@@ -1,0 +1,85 @@
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script>
+    $(function () {
+        var socket = io();
+        var capturas = [];
+
+
+        socket.on('server:captures', function (captures) {
+            console.log(captures);
+            var content = '';           
+            for (let i = 0; i < captures.length; i++) {
+                content += (
+                    `
+                    <div class="card mb-3 my-2">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-6">
+                                    ${captures[i].id}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body card bg-light p-1" id=capture${i}>
+                            <div class="row" id=capture${i}>
+                                <div class="col-sm-6">
+                                    <div class="row">
+                                        <div class="input-group input-group-sm col-md-4">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">NETO </span>
+                                            </div>
+                                            <input class="form-control" style="background:#FFF;" id="lblNETO" readonly="" value="${captures[i].net}" />
+                                            <div class="input-group-append">
+                                                <span class="input-group-text">${captures[i].unit}</span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm col-md-4">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">TARE </span>
+                                            </div>
+                                            <input class="form-control" style="background:#FFF;" id="lblTARE" readonly="" value="${captures[i].tare}" />
+                                            <div class="input-group-append">
+                                                <span class="input-group-text">${captures[i].unit}</span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm col-md-4">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">GROSS</span>
+                                            </div>
+                                            <input class="form-control" style="background:#FFF;" id="lblGROSS" readonly="" value="${captures[i].gross}" />
+                                            <div class="input-group-append">
+                                                <span class="input-group-text">${captures[i].unit}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="row">
+                                        <div class="input-group input-group-sm col-md-6">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">HORA</span>
+                                            </div>
+                                            <input class="form-control" style="background:#FFF;" id="lblHORA" readonly="" value="${captures[i].datetime}" />
+                                        </div>
+                                        <div class="input-group input-group-sm col-md-6">                                            
+                                            <a class="btn btn-block btn-outline-primary">Historico de Pesos</a>
+                                        </div>                                         
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                );
+            }
+            $("#pnlCaptura").html(content);            
+        });
+        
+        /*socket.on('server:data', function (data) {
+            //console.log(data);            
+        });*/
+    });
+</script>
+
+<div class="container-fluid">
+    <div id="pnlCaptura" class="my-2"></div>
+</div>

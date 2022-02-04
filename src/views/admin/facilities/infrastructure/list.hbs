@@ -3,8 +3,7 @@
 
 <script>
     var instalaciones = {{{ json instalaciones }}};
-    //console.log(instalaciones);
-
+    
     function responseHandler(res) {
         $.each(res.rows, function (i, row) {
             row.state = $.inArray(row.id, selections) !== -1
@@ -13,9 +12,7 @@
     }
 </script>
 
-
 {{{breadcrumb}}}
-
 
 <div id="toolbar">
     {{#if area}}
@@ -38,8 +35,8 @@
         data-show-custom-view="true"
         data-custom-view="customViewFormatter"
         id="table"
-        data-toggle="table" data-locale="es-ES"
-        {{!--data-url="json/data1.json" --}}
+        data-toggle="table"
+        data-locale="es-ES"
         data-toolbar="#toolbar"
         data-search="true"
         data-advanced-search="true"
@@ -56,6 +53,12 @@
         data-sortable="true"
         data-minimum-count-columns="2"
         data-show-pagination-switch="true"
+        
+        data-search-accent-neutralise="true"
+        data-search-highlight = "true"
+        {{#if search}}
+        data-search-text = "{{search}}"
+        {{/if}}
         {{#if area}}
         data-pagination="true"        
         {{/if}}
@@ -74,7 +77,7 @@
                 <!--th data-field="id" data-sortable="true">ID</th-->
                 <th data-field="planta" data-sortable="true">Planta</th>
                 <th data-field="area" data-sortable="true">Area</th>
-                <th data-field="codigo">Codigo</th>
+                <th data-field="codigo" data-sortable="true">Codigo</th>
                 <th data-field="nombre">Nombre</th>
                 <th data-field="ambiente" data-sortable="true">Ambiente</th>
                 <th data-field="pisonivel" data-sortable="true">Piso Nivel</th>
@@ -105,21 +108,18 @@
     var $table = $('#table')
     var $remove = $('#remove')
     var selections = []
+    
+    //var $sea = $("div.bootstrap-table > div.fixed-table-toolbar > div.search > input.form-control").val();
+   
 
-    function editar(id) {
-        $.get(
-            '{{links.path}}{{links.edit}}', // url
-            { id }, // data to be submit
-            function (data) {
-                //console.log(data);            
-                //window.location = '{{links.path}}';
-            }
-        );
+
+    function editar(code) {
+        let search = $("div.bootstrap-table > div.fixed-table-toolbar > div.search > input.form-control").val();
+        window.location.href = "{{links.path}}{{links.edit}}?edit="+code+"&search="+search;
     };
 
     function eliminar(code) {
-        console.log(code);        
-
+        let search = $("div.bootstrap-table > div.fixed-table-toolbar > div.search > input.form-control").val();
         $("#dialog").dialog({
             resizable: false,
             height: "auto",
@@ -129,7 +129,7 @@
             buttons: {
                 "Si": function () {
                     $.post('{{links.path}}{{links.delete}}', // url
-                        { 'code': code } // data to be submit
+                        { 'code': code, 'search':search } // data to be submit
                     ).done(function (data) {
                         window.location.href = {{{ json links.redirect }}};
                     }).fail(function () {
@@ -177,10 +177,14 @@
                 '<p class="card-text text-center">'+data['ambiente']+'</p>',
             '</div>',
             '<div class="card-footer text-right">',
-                    '<a class="btn btn-outline-info mx-1" href="{{links.path}}{{links.edit}}?edit=' + data['codigo'] + '">',
+                    '<button class="btn btn-outline-info mx-1" onClick="editar(' +`'${data['codigo']}'` + ')">',
+                    '<i class="fa fa-fw fa-edit"></i>',
+                    'Editar',
+                    '</button>',
+                    /*'<a class="btn btn-outline-info mx-1" href="{{links.path}}{{links.edit}}?edit=' + data['codigo'] + '">',
                         '<i class="fa fa-fw fa-edit"></i>',
                         'Editar',
-                    '</a>',
+                    '</a>',*/
 
                     '<button class="btn btn-outline-danger mx-1" onClick="eliminar(' +`'${data['codigo']}'` + ')">',
                     '<i class="fa fa-fw fa-trash"></i>',

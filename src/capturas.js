@@ -3,6 +3,8 @@ import path from "path";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import fs from 'fs';
+import http from 'http';
+
 // -> Path
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -98,7 +100,7 @@ app.get('/captura/fbus', function (req, res) {
                     capture.balances[index].tare = value;
                 } else if (capture.filters[filter.filter_gross].enable && match.gross != null) {
                     capture.balances[index].gross = value;
-                    if(capture.filters[filter.filter_gross].flag){
+                    if (capture.filters[filter.filter_gross].flag) {
                         capture.balances[index].tare = 0;
                         capture.balances[index].net = capture.balances[index].gross;
                     }
@@ -127,25 +129,46 @@ app.get('/captura/fbus', function (req, res) {
                 data.time = capture.balances[index].time;
                 console.log(JSON.stringify(data));
 
-                if(data.gross===0){
-                    data.net=0;
-                    data.tare=0;
+                if (data.gross === 0) {
+                    data.net = 0;
+                    data.tare = 0;
                 }
 
-                if(data.net + data.tare !== data.gross){
+                if (data.net + data.tare !== data.gross) {
                     data.net = data.gross;
                     data.tare = 0;
                 }
 
+                let output = new TextEncoder().encode(
+                    JSON.stringify(data)
+                );
                 fs.writeFile('/mnt/pesaje/' + capture.balances[index].code + ".txt", JSON.stringify(data), function (err) {
                     if (err) return console.log(err);
                     //console.log('write successfully');
                 });
 
-                
+                const request = http.request(
+                    {
+                        hostname: '10.0.103.3',
+                        port: 4000,
+                        path: '/capture/enlace',
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Content-Length': output.length
+                        }
+                    }, res => {
+                        console.log(`statusCode: ${res.statusCode}`)
+                        /*res.on('data', d => {
+                            process.stdout.write(d)
+                        });*/
+                    }
+                );
+                request.write(output);
+                request.end();
                 //s.writeFile('//srvwinsap/pesaje/' + capture.balances[index].code + ".txt", JSON.stringify(capture.balances[index]), function (err) {
                 //    if (err) return console.log(err);
-                    //console.log('write successfully');
+                //console.log('write successfully');
                 //});
 
                 //fs.writeFile('//172.16.10.165/pesaje/'+capture[index].data.id+".txt", JSON.stringify(capture[index].data), function (err) {
