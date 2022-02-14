@@ -1,9 +1,12 @@
 import app from "../../app.js";
 import * as helpers from "../../lib/helpers.js";
 import moment from 'moment';
+import Capture from "../../models/capture.js";
 
 const captureCtrl = {};
 
+
+const capture = new Capture();
 const navigate = { capture: true };
 
 var captures = JSON.parse(`[
@@ -13,8 +16,9 @@ var captures = JSON.parse(`[
     {"id":"PES-565","net":10,"tare":0,"gross":0,"unit":"g","time":1636378374}    
 ]`);
 
-captureCtrl.list = function (req, res) {
-    res.render('capture/index.hbs', { navigate });
+captureCtrl.list = async function (req, res) {
+    let plants = await capture.list_capture_by_user_id(req.user.id);
+    res.render('capture/index.hbs', { navigate, plants});
     const io = app.get('io');
     io.on('connection', function (socket) {
         console.log('a user connected ' + socket.id);
@@ -23,6 +27,7 @@ captureCtrl.list = function (req, res) {
             capture.datetime = moment(new Date(capture.time * 1000)).format('HH:mm:ss DD/MM/YYYY');;
             capture.timeago = helpers.timeago(capture.time * 1000);
         });
+        
         socket.emit('server:captures', captures);
     });
     //app.get('io').emit('server:captures', captures);

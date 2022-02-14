@@ -8,7 +8,7 @@
 
         socket.on('server:captures', function (captures) {
             console.log(captures);
-            var content = '';           
+            var content = '';
             for (let i = 0; i < captures.length; i++) {
                 content += (
                     `
@@ -71,14 +71,194 @@
                     `
                 );
             }
-            $("#pnlCaptura").html(content);            
+            $("#pnlCaptura").html(content);
         });
-        
+
         /*socket.on('server:data', function (data) {
             //console.log(data);            
         });*/
     });
 </script>
+
+<link rel="stylesheet" type="text/css" href="css/dseg.css">
+<style>
+    .balanzas {
+        background-color: #fbfbfb;
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-bottom: 10px;
+        max-width: 1280px;
+        color: #222;
+        font-family: Meiryo, 'Lucida Grande', 'Hiragino Kaku Gothic ProN', sans-serif;
+    }
+    .weight-background {
+        z-index: 50;
+        position: absolute;
+        color: rgba(0, 0, 0, 0.15);
+        font-family:DSEG7-Modern;
+    }
+    .weight-front {
+        z-index: 100;
+        position: absolute;
+        font-family:DSEG7-Modern;
+    }
+    .weight-front {
+        z-index: 100;
+        position: absolute;
+        left: 340;
+    }
+    .weight-wrapper {
+        position: relative;
+        text-align: right;
+        border: 6px solid #000;
+        border-radius: 9px;
+        height: 160px;
+        width: 512px;
+        background-color: #99ad48;
+        box-shadow: 4px 4px 1px 0px rgba(0, 0, 0, 0.1) inset;
+    }
+    .weight-unit {
+        z-index: 100;
+        position: absolute;
+        text-align: right;
+    }
+    @media screen and (min-width: 621px) {
+        .weight-background {            
+            top: 32px;
+            left: 40px;
+            font-size: 72px;
+        }
+        .weight-front {
+            top: 32px;
+            left: 40px;
+            font-size: 72px;
+        }
+        .weight-unit {            
+            font-size: 64px;
+            top: 40px;
+            left: 440px;
+        }
+    }
+
+    /* If the screen size is 600px wide or less, set the font-size of <div> to 30px */
+    @media screen and (max-width: 620px) {
+        .weight-background {
+            top: 32px;
+            left: 20px;
+            font-size: 52px;
+        }
+        .weight-front {
+            top: 32px;
+            left: 20px;
+            font-size: 52px;
+        }
+        .weight-wrapper {
+            border-radius: 6px;
+            height: 120px;
+            width: 339px;
+        }
+        .weight-unit {            
+            font-size: 40px;
+            top: 48px;
+            left: 292px;
+        }
+    }
+
+    @media screen and (max-width: 440px) {
+        .weight-background {
+            top: 30px;
+            left: 16px;
+            font-size: 36px;
+        }
+        .weight-front {
+            top: 30px;
+            left: 16px;
+            font-size: 36px;
+        }
+        .weight-wrapper {
+            border-radius: 6px;
+            height: 96px;
+            width: 240px;
+        }
+        .weight-unit {            
+            font-size: 24px;
+            top: 44px;
+            left: 200px;
+        }
+    }
+
+    
+</style>
+
+<ul class="breadcrumb">
+    <span><i class="fa fa-inbox mx-2"></i></span>
+    <li class="breadcrumb-item">
+        <label class="text-primary mb-0" data-toggle="tooltip" data-placement="bottom" title="">Bus de campo</label>
+    </li>
+</ul>
+
+<div class="container-fluid">
+    <div id="pnlBalanzas" class="my-2">
+        {{#each plants}}
+        <div class="card p-auto  mb-3 my-2">
+            <div class="card-header">{{name}}</div>
+            <div class="card-body bg-light p-1" id={{code}}>
+                <div class="accordion" id="accordionData">
+                    {{#each areas}}
+                    <div class="card p-auto">
+                        <div class="card-header btn-outline-primary m-0" id="heading{{code}}" data-toggle="collapse" data-target="#collapse{{code}}" aria-expanded={{#if @first}}"true"{{else}}"false"{{/if}} aria-controls="collapse{{code}}">
+                            <h6 class="card-title font-weight-light m-0">
+                                <span class="title">{{name}}</span>
+                                <span class="action-icon"><i class="fas fa-angle-down rotate-icon"></i></span>
+                            </h6>
+                        </div>
+                        <div id="collapse{{code}}" class="collapse {{#if @first}}show{{/if}}" aria-labelledby="heading{{code}}" data-parent="#accordionData">
+                            <div class=" m-0 p-1 ">
+                                {{#each locations}}
+                                {{#if balances.length}}
+                                <div class="card m-auto p-0">
+                                    <h6 class="card-header">
+                                        <span class=" font-weight-bold mr-2">{{code}}</span>{{name}}
+                                    </h6>
+                                    <div class="card-body p-1">
+                                        <div class="row m-0 p-0">
+                                            {{#each balances}}
+                                            <div class="card col-12 col-xl-6 m-auto p-auto">
+                                                <div class="card-body">                                                    
+                                                    <div class="card-title mb-0">
+                                                        <a href="/capturas/balanza?id={{code}}">
+                                                            <h6 class="font-weight-bold m-0">{{code}}</h6>
+                                                            <small class="text-muted">{{name}}</small>
+                                                        </a>
+                                                    </div>
+                                                    <div class="weight-wrapper m-auto p-auto">
+                                                        <h5 class="my-3" style="position: absolute; left:10px"><span class="mr-1" style="position: absolute; top:-12px; font-size: 12px;" >TARA</span>20.51</h5>
+                                                        <h5 class="my-3" style=""><span style="position:absolute; top:4px; font-size: 12px;">BRUTO</span>52220.0</h5>
+                                                        <span class="weight-background">8888.88</span>
+                                                        <span id="net-{{code}}" class="weight-front">0000.00</span>
+                                                        <span id="unit-{{code}}" class="weight-unit">{{data.unit}}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {{/each}}
+                                        </div>
+                                    </div>
+                                </div>
+                                {{/if}}
+                                {{/each}}
+                            </div>
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+</div>
+<div class="container-fluid">
+    <div id="pnlImpresoras" class="my-2"></div>
+</div>
 
 <div class="container-fluid">
     <div id="pnlCaptura" class="my-2"></div>

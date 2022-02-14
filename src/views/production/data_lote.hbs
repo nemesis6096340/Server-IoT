@@ -9,6 +9,22 @@
 <script src="https://unpkg.com/bootstrap-table@1.19.1/dist/bootstrap-table.min.js"></script>
 <script src="https://unpkg.com/bootstrap-table@1.19.1/dist/extensions/export/bootstrap-table-export.min.js"></script>
 
+<ul class="breadcrumb">
+    <span><i class="fa fa-clock mx-2"></i></span>
+    <li class="breadcrumb-item">
+        <a href="/produccion" class="text-primary">Produccion</a>
+    </li>
+    <li class="breadcrumb-item">
+        <label class="text-link text-primary mb-0" data-toggle="tooltip" data-placement="bottom" title="{{produccion_datos.equipo}}">
+            <a href="/produccion/contador?id={{produccion_datos.contador}}" class="text-primary">
+                {{produccion_datos.codigo}}
+            </a>
+        </label>
+    </li>
+    <li class="breadcrumb-item">
+        <label class="text-primary mb-0" data-toggle="tooltip" data-placement="bottom" title="">{{produccion_datos.lote}}</label>
+    </li>
+</ul>
 <div class="container">
     <table class="table table-sm">
         <thead>
@@ -25,9 +41,13 @@
             <td>{{produccion_datos.hini}}</td>            
         </tr> 
         <tr>
-            <th scope="row">HORA FINAL: </th>
+            <th scope="row">HORA FINAL :</th>
             <td>{{produccion_datos.hfin}}</td>            
-        </tr>      
+        </tr>
+        <tr>
+            <th scope="row">TOTAL PRODUCIDO :</th>
+            <td>{{produccion_datos.total_producido}}</td>            
+        </tr> 
         </tbody>
     </table>
 

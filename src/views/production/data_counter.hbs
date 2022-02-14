@@ -1,14 +1,44 @@
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script>
+    $(function () {
+        var socket = io();
+
+        socket.on('server:data', function (data) {
+            console.log(data);
+            $("#count" + data.id).find('#lblLOTE').val(data.lote);
+            $("#count" + data.id).find('#lblHINICIO').val(data.hini);
+            $("#count" + data.id).find('#lblTOTAL').val(data.total);
+            $("#count" + data.id).find('#lblTURNO').val(data.turn);
+            $("#count" + data.id).find('#lblPARCIAL').val(data.hour_current);
+            $("#count" + data.id).find('#lblESTADO').val(data.status);
+            if(data.speed != 0)
+                $("#count" + data.id).find('#holdTOTAL').html(`...velocidad maquina  ${data.speed}`);
+            $("#count" + data.id).find('#holdTURNO').html(data.hres);
+            if(data.hour != 0)
+                $("#count" + data.id).find('#holdPARCIAL').html(`...la hora anterior ${data.hour}`);
+            $("#count" + data.id).find('#holdESTADO').html(data.hreg);
+        });
+    });
+</script>
+
 <ul class="breadcrumb">
-    <span><i class="fa fa-tasks mx-2"></i></span>
+    <span><i class="fa fa-clock mx-2"></i></span>
     <li class="breadcrumb-item">
         <a href="/produccion" class="text-primary">Produccion</a>
-    </li>    
+    </li>
+    <li class="breadcrumb-item">
+        <label class="text-primary mb-0" data-toggle="tooltip" data-placement="bottom" title="{{data.equipment}}">{{data.code}}</label>
+    </li>
 </ul>
 <div class="container">
     <div class="row mx-2" id="count{{data.id}}">
-        <div class="col-12">
-            <img src="/img/{{data.code}}.png" class="img-fluid img-thumbnail mx-auto d-block">            
-            <p style="font-size: 10px; text-align: center;">{{data.equipment}}</p>
+        <div class="col-12 text-center mb-2">
+            <img src="/img/{{data.code}}.png" class="img-fluid img-thumbnail mx-auto d-block">
+            <h6 class="font-weight-bold m-0">{{data.code}}</h6>
+            <small class="">{{data.equipment}}</small>
+            <!--img src="/img/{{data.code}}.png" class="img-fluid img-thumbnail mx-auto d-block">
+            <p style="font-size: 10px; text-align: center;">{{data.equipment}}</p-->
         </div>
         <div class="col-12">
             <div class="row">

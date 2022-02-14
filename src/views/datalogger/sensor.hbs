@@ -1,0 +1,71 @@
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    .chart {
+        width: 100%; 
+        min-width: 340px;
+        height: 340px;
+    }
+    .row {
+        margin:0 !important;
+    }
+}
+</style>
+<ul class="breadcrumb">
+    <span><i class="fa fa-chart-area mx-2"></i></span>
+    <li class="breadcrumb-item">
+        <a href="/termohigrometria" class="text-primary">Termohigrometria</a>
+    </li>
+    <li class="breadcrumb-item">
+        <label class="text-primary mb-0" data-toggle="tooltip" data-placement="bottom" title="">Sensor</label>
+    </li>
+</ul>
+
+<div class="container-fluid">
+    <div class="m-auto" style="position: relative; height:40vh; width:90vw"></divstyle>
+        <canvas id="myChart"></canvas>
+    </div>
+    
+</div>
+
+<script type="text/javascript">
+    const ctx = document.getElementById('myChart').getContext('2d');
+
+    const labels = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+    ];
+    const data = {
+        labels: labels,
+        datasets: [{
+            label: 'My First dataset',
+            backgroundColor: 'rgb(255, 99, 132)',
+            borderColor: 'rgb(255, 99, 132)',
+            data: [0, 10, 5, 2, 20, 30, 45],
+        }]
+    };
+
+    const config = {
+        type: 'line',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Chart.js Line Chart'
+                }
+            }
+        },
+    };
+    const myChart = new Chart(ctx, config);
+</script>

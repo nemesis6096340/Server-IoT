@@ -8,7 +8,7 @@ const facilities = new Facilities();
 function renameProperty(obj, oldName, newName) {
     obj[newName] = obj[oldName];
     delete obj[oldName];
-  }
+}
 
 const links = {
     path: "/administrar/instalaciones/equipos",

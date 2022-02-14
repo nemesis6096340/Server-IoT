@@ -7,7 +7,7 @@ import myconnection from 'express-myconnection';
 import config from "./config.js";
 import routes from "./routes/index.js";
 
-import { timeago } from "./lib/helpers.js"
+import { timeago, checklength } from "./lib/helpers.js"
 
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -45,7 +45,8 @@ app.engine(
             json: function (context) {
                 return JSON.stringify(context);
             },
-            timeago
+            timeago,
+            checklength
         },
     })
 );
@@ -72,7 +73,7 @@ app.use(
             secret: 'sesion secreta',
             store: sessionStore,
             resave: true,
-            saveUninitialized: true,
+            saveUninitialized: false,
             cookie: {
             }
         }

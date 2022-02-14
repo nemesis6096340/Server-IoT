@@ -1,48 +1,93 @@
 <style type="text/css">
-.container-fluid .breadcrumb {
-  overflow: hidden;    
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  margin: 0;
-}
+    .container-fluid .breadcrumb {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin: 0;
+    }
 
-.container-fluid .breadcrumb li {
-  display: inline;
-}
-
+    .container-fluid .breadcrumb li {
+        display: inline;
+    }
 </style>
 
-    <!-- Breadcrumb -->
-    <!--ul class="breadcrumb px-1 py-0 my-0">
-        <li class="breadcrumb-item mx-2">
-            <a href="/dashboard" data-abc="true" class="text-primary text-decoration-none">
-                <i class="fa fa-chart-pie"></i>
-                Dashboard
-            </a>
-        </li>
-    </ul-->
-    <!--
-    <ul class="breadcrumb" data-toggle="modal" data-target="#modal-find-zone">
-        <span>
-            <i class="fa fa-industry mx-2"></i>
-        </span>
-        <li class="breadcrumb-item">
-            Planta El Alto
-        </li>
-        <li class="breadcrumb-item">
-            Almacén de Materia Prima anexo El Alto
-        </li>
-        <li class="breadcrumb-item">
-            Recepcion de Materia Prima
-        </li>
-    </ul>
+<!-- Breadcrumb -->
+<ul class="breadcrumb">
+    <span><i class="fa fa-chart-pie mx-2"></i></span>
+    <li class="breadcrumb-item">
+        <label class="text-primary mb-0" data-toggle="tooltip" data-placement="bottom" title="">Dashboard</label>
+    </li>
+    <li class="breadcrumb-item ml-2">
+        <a href=# class="text-primary" data-toggle="modal" data-target="#modal-find-zone"><span><i class="fa fa-map mx-2"></i>Listar por ubicacion</span></a>
+    </li>
+</ul>
 
-    <div class="jumbotron jumbotron-fluid p-2 mb-0">
-        <div class="p-0 m-0" >
-            <h4 class="Heading-2 mb-0">Recepcion de Materia Prima</h4>      
-        </div>
-        <hr class="my-1">
+<!--ul class="breadcrumb" data-toggle="modal" data-target="#modal-find-zone">
+    <span>
+        <i class="fa fa-industry mx-2"></i>
+    </span>
+    <li class="breadcrumb-item">
+        Planta El Alto
+    </li>
+    <li class="breadcrumb-item">
+        Almacén de Materia Prima anexo El Alto
+    </li>
+    <li class="breadcrumb-item">
+        Recepcion de Materia Prima
+    </li>
+</ul-->
+
+<!--div class="jumbotron jumbotron-fluid p-2 mb-0">
+    <div class="p-0 m-0">
+        <h4 class="Heading-2 mb-0">Recepcion de Materia Prima</h4>
     </div>
-    -->
-    
+    <hr class="my-1">
+</div-->
+
+<div class="container-fluid">
+    <style>
+        #slideshow {
+            position: relative;
+            width: 300px;
+            height: 520px;
+            padding: 10px;
+        }
+
+        #slideshow>div {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+
+        #slideshow>div>img {
+            border: 2px solid white;
+            box-shadow: 0 0 20px white;
+        }
+    </style>
+
+    <div id="slideshow" class="w-100">
+        {{#each ubicaciones}}
+        <div id="{{@index}}">            
+            <span class=" font-weight-bold mr-2">{{codigo}}</span>{{detalle}}
+        </div>
+        {{/each}}
+    </div>
+
 {{> modal-find-zone_body}}
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+
+<script>
+    $("#slideshow > div").hide();
+    $('#slideshow > div:first').show();
+
+    setInterval(function () {
+        $('#slideshow > div:first')
+            .fadeOut(1000)
+            .next()
+            .fadeIn(1000)
+            .end()
+            .appendTo('#slideshow');
+    }, 5000);
+</script>

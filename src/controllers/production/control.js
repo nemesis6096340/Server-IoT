@@ -7,6 +7,9 @@ import schedule from 'node-schedule';
 import moment from 'moment';
 moment.locale('es');
 
+import Production from "../../models/production.js";
+const production = new Production();
+
 const links = {
     path: "/produccion/enlace",
 };
@@ -181,15 +184,17 @@ controlCtrl.logger = function (req, res) {
 controlCtrl.list = async function (req, res) {
     //res.send(JSON.stringify(counters));
     
-    const result = await pool.query("select distinct area from db_ControldeProduccion_V4.mostrarContadores;");
+    //const result = await pool.query("select distinct area from db_ControldeProduccion_V4.mostrarContadores;");
     
-    const areas = JSON.parse(JSON.stringify(result));
+    //const areas = JSON.parse(JSON.stringify(result));
     //console.log(areas);
     //console.log(counters);
 
-    res.render('production/current.hbs', { navigate, areas, counters});
+    const data = await production.list_counters_by_user_id(req.user.id);
 
-    app.get('io').emit('server:areas', areas);
+    res.render('production/current.hbs', { navigate, counters, data});
+
+    //app.get('io').emit('server:areas', areas);
     app.get('io').emit('server:counters', counters);
 
     counters.forEach(counter => {
