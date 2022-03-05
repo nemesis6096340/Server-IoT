@@ -3,7 +3,7 @@ import config from "../config.js";
 const { captcha } = config;
 
 export const reCaptcha = function (req, res, next) {
-    console.log(req.body);
+    //console.log(req.body);
     if (!req.body.captcha) {
         res.json({ "message": "No se reconoce el captcha." });
     }
@@ -12,7 +12,7 @@ export const reCaptcha = function (req, res, next) {
 
     request(verifyUrl, function (error, response, body) {
         if (error) {
-            console.log(error);
+            //console.log(error);
             req.flash("error", "Error de conexión, vuelva intentarlo más tarde.");
             return res.redirect('/');
         }

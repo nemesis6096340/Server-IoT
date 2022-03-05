@@ -4,7 +4,7 @@ import { promisify } from "util";
 import config from "./config.js";
 
 const { db } = config;
-console.log(db);
+//console.log(db);
 
 const pool = mysql.createPool(db);
 var connectionSync = new syncMysql(db);

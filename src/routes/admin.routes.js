@@ -4,7 +4,7 @@ import admin from "../controllers/admin.controller.js";
 import equipment from "../controllers/facilities/equipment.controller.js";
 import infrastructure from "../controllers/facilities/infrastructure.controller.js";
 
-import devices from "../controllers/devices/index.js";
+import devices from "../controllers/devices/devices.controller.js";
 import users from "../controllers/users/index.js";
 
 const router = Router();

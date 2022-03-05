@@ -25,6 +25,17 @@ class Facilities {
         this.load_equipments();
     }
 
+    async get_equipment_code_by_id(id){
+        let code = "";
+        if(Number.isInteger(Number(id))){
+            let result = await this.equipments.find(x=>x.id == id);
+            console.log(result);
+            if(result)
+                code = this.get_equipment_code(result.area, result.id);
+        } 
+        return code;
+    };
+
     get_equipment_code(area, id){
         let code = '';
         code = code.concat(zeroPad(id / 1000,3));
@@ -108,6 +119,7 @@ class Facilities {
         return false;
     };
 
+    
 
     get_zone_data(code_zone){
         let data = {};
@@ -124,14 +136,22 @@ class Facilities {
         return this.plants.find(x => x.codigo === code_planta);
     }
 
-    get_area_by_zone(code_zone){        
-        let code_area = this.equipments.find(x=>x.ubicacion === code_zone).area;        
-        return this.areas.find(x => x.codigo === code_area);
+    get_area_by_zone(code_zone){
+        let result = this.equipments.find(x=>x.ubicacion === code_zone)
+        if(result){
+            let code_area = result.area;
+            return this.areas.find(x => x.codigo === code_area);
+        }
+        return [];
     }
     
     get_plant_by_area(code_area){
-        let code_plant = this.areas.find(x=>x.codigo === code_area).planta;
-        return this.plants.find(x=> x.codigo = code_plant);
+        let result = this.areas.find(x=>x.codigo === code_area)
+        if(result){
+            let code_plant = result.planta;
+            return this.plants.find(x=> x.codigo = code_plant);
+        }
+        return[];
     }
 
     // INFRAESTRUCTURAS
@@ -309,8 +329,6 @@ class Facilities {
         }
         else return false;
     }
-
-
 
     // VISTAS
     generate_breadcrum_zone(code_zone){

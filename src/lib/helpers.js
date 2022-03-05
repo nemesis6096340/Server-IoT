@@ -62,11 +62,3 @@ export const updateURLParameter = function (url, param, paramVal){
     return baseURL + "?" + newAdditionalURL + rows_txt;
 };
 
-export const checklength = function (v1, v2, options) {
-    'use strict';
-    if (v1>v2) {
-        return options.fn(this);
-    }
-    return options.inverse(this);
-};
-

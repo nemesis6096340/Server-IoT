@@ -1,4 +1,7 @@
 import pool from "../database.js";
+import fs from 'fs';
+import moment from 'moment';
+moment.locale('es');
 
 const db_facilities = "db_EquiposeInfraestructura_V1";
 const db_datalogger = "db_TermohigrometriaNET_V4";
@@ -15,6 +18,65 @@ class Datalogger {
     constructor() {
 
     };
+
+    save_current_data(id, code, data){
+        if( Number.isInteger(Number(id)) && data.hasOwnProperty('time') && data.hasOwnProperty('humd') && data.hasOwnProperty('temp')){
+            pool.query(`update ${db_datalogger}.termohigrometros set medicion = '${JSON.stringify(data)}' where id = ${id};`);
+            pool.query(`call ${db_datalogger}.registrarMediciones(${id}, ${data.time},${data.humd * 10}, ${data.temp * 10});`);
+
+            let data_sensor = parseInt(data.time, 10).toString(16).padStart(8, 0) + parseInt(data.humd * 10, 10).toString(16).padStart(4, 0) + parseInt(data.temp * 10, 10).toString(16).padStart(4, 0);
+            let file_path = `./cache/THM/${code}`;
+            if (!fs.existsSync(file_path)) {
+                fs.mkdirSync(file_path, { recursive: true });
+            }
+            let file_name = moment(new Date(data.time * 1000)).format('YYYYMMDD');
+            fs.appendFile(`${file_path}/${file_name}.txt`, `${data_sensor.toUpperCase()}`, function (err) {
+                if (err) return console.log(err);
+            });
+        }
+    }
+
+    get_current_data(){
+        let data = [];
+        let result_data = pool.querySync(`select id, code, medicion from ${db_datalogger}.medicionActual;`);
+        //console.log(result_data);
+        result_data.forEach(result => {
+            let current = {};
+            current.id = result.id;
+            current.code = result.code;
+            if(result.medicion === null)
+                current.data = {};
+            else
+                current.data = JSON.parse(result.medicion);
+            data.push(current);
+            //console.log(JSON.stringify(current));
+        });        
+        return data;
+    }
+
+    async get_history_of_measurements (id, hini, hfin){
+        let data = {};
+        data.datetime = [];
+        data.temperature = [];
+        data.humidity = [];
+        data.dewpoint = [];
+
+        if(Number.isInteger(Number(id)) && Number.isInteger(Number(hini)) && Number.isInteger(Number(hfin)) && hfin > hini){
+            let result_query = await pool.query(`call ${db_datalogger}.getDataloggerChart(?,?,?);`,[id, hini, hfin]);
+            if(result_query){
+                let measurements = JSON.parse(JSON.stringify(result_query))[0];
+                measurements.forEach( measurement  => {
+                    data.datetime.push(measurement.HREG);
+                    data.temperature.push(measurement.TEMP);
+                    data.humidity.push(measurement.HUMD);
+                    data.dewpoint.push(measurement.DEWP);
+
+                });
+
+            }
+        }
+        return data;
+    }
 
     /*
     [
@@ -55,6 +117,8 @@ class Datalogger {
         let list_dataloggers = [];
         let tree_locations = await users.get_tree_locations_by_user_id(id);
         if(tree_locations.length > 0){
+            let current_data = this.get_current_data();
+            //console.log(JSON.stringify(current_data));
             for (let i = 0; i < tree_locations.length; i++) {
                 let plant_in_location = tree_locations[i];
                 let plant_data = {};
@@ -82,6 +146,11 @@ class Datalogger {
                                     let data_sensor = {};
                                     data_sensor.code = sensor_code;
                                     data_sensor.name = sensor_in_area.objeto;
+                                    data_sensor.data = {};
+                                    let find_sensor_data = current_data.find(sensor => sensor.id === sensor_in_area.id); 
+                                    if(find_sensor_data)
+                                        //console.log(find_sensor_data.data);
+                                        data_sensor.data = find_sensor_data.data;
                                     location_data.sensors.push(data_sensor);
                                 }
                             }

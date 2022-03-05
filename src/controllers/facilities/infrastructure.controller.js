@@ -92,9 +92,12 @@ infrastructureCtrl.location = async function (req, res) {
     instalaciones.area = area;
 
     links.redirect = req.originalUrl;
-
-    let file_name = ''.concat(instalaciones.infraestructuras[0].planta, " - ", instalaciones.infraestructuras[0].area);
+    let file_name='';
+    if(instalaciones.infraestructuras.length>0){
+        file_name = ''.concat(instalaciones.infraestructuras[0].planta, " - ", instalaciones.infraestructuras[0].area);
+    }
     let file_export_options = JSON.stringify({ 'fileName': file_name });
+
     res.render('admin/facilities/infrastructure/list.hbs', { instalaciones, links, file_export_options, navigate, breadcrumb, area });
 }
 
