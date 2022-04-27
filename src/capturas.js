@@ -20,7 +20,9 @@ var capture = {
             { 'id': 565, 'code': 'PES-565', 'unit': 0, 'time': 0, 'net': 0, 'tare': 0, 'gross': 0, 'settings': 2, 'enable': 1, 'interval': 60, 'loger': 0, 'delete': 0 },
             { 'id': 506, 'code': 'PES-506', 'unit': 0, 'time': 0, 'net': 0, 'tare': 0, 'gross': 0, 'settings': 0, 'enable': 1, 'interval': 60, 'loger': 0, 'delete': 0 },
             { 'id': 658, 'code': 'PES-658', 'unit': 0, 'time': 0, 'net': 0, 'tare': 0, 'gross': 0, 'settings': 1, 'enable': 1, 'interval': 60, 'loger': 0, 'delete': 0 },
-            { 'id': 557, 'code': 'PES-557', 'unit': 0, 'time': 0, 'net': 0, 'tare': 0, 'gross': 0, 'settings': 2, 'enable': 1, 'interval': 60, 'loger': 0, 'delete': 0 }
+            { 'id': 557, 'code': 'PES-557', 'unit': 0, 'time': 0, 'net': 0, 'tare': 0, 'gross': 0, 'settings': 2, 'enable': 1, 'interval': 60, 'loger': 0, 'delete': 0 },
+            { 'id': 650, 'code': 'PES-650', 'unit': 0, 'time': 0, 'net': 0, 'tare': 0, 'gross': 0, 'settings': 0, 'enable': 1, 'interval': 60, 'loger': 0, 'delete': 0 },
+            { 'id': 582, 'code': 'PES-582', 'unit': 1, 'time': 0, 'net': 0, 'tare': 0, 'gross': 0, 'settings': 3, 'enable': 1, 'interval': 60, 'loger': 0, 'delete': 0 }
         ],
     "filters":
         [
@@ -29,6 +31,11 @@ var capture = {
             { 'id': 2, 'match': '(........g NET\r\n)', 'enable': 1, 'flag': 0 },// 557
             { 'id': 3, 'match': '(....... g T\r\n)', 'enable': 1, 'flag': 0 },// 557
             { 'id': 4, 'match': '(........g\r\n)', 'enable': 1, 'flag': 1 },// 557
+
+            { 'id': 5, 'match': '(....... kg NET\r\n)', 'enable': 1, 'flag': 0 },// 582 583
+            { 'id': 6, 'match': '(....... kg T\r\n)', 'enable': 1, 'flag': 0 },// 582 583
+            { 'id': 7, 'match': '(....... kg G\r\n)', 'enable': 1, 'flag': 0 },// 582 583
+            
         ],
     "commands":
         [
@@ -39,7 +46,8 @@ var capture = {
         [
             { 'id': 0, 'tittle': '', 'description': '', 'port': 0, 'filter_value': 0, 'filter_net': 0, 'filter_tare': 0, 'filter_gross': 0, 'filter_unit': 0, 'filter_unstable': 0, 'command_get_interval': 1000, 'command_get_net': 0, 'command_get_tare': 0, 'command_get_gross': 0, 'command_set_zero': 0, 'command_set_tare': 0 },
             { 'id': 1, 'tittle': '658', 'description': '', 'port': 0, 'filter_value': 0, 'filter_net': 0, 'filter_tare': 0, 'filter_gross': 1, 'filter_unit': 0, 'filter_unstable': 0, 'command_get_interval': 1000, 'command_get_net': 0, 'command_get_tare': 0, 'command_get_gross': 0, 'command_set_zero': 0, 'command_set_tare': 0 },
-            { 'id': 2, 'tittle': '557', 'description': '', 'port': 0, 'filter_value': 0, 'filter_net': 2, 'filter_tare': 3, 'filter_gross': 4, 'filter_unit': 0, 'filter_unstable': 0, 'command_get_interval': 1000, 'command_get_net': 0, 'command_get_tare': 0, 'command_get_gross': 0, 'command_set_zero': 0, 'command_set_tare': 0 }
+            { 'id': 2, 'tittle': '557', 'description': '', 'port': 0, 'filter_value': 0, 'filter_net': 2, 'filter_tare': 3, 'filter_gross': 4, 'filter_unit': 0, 'filter_unstable': 0, 'command_get_interval': 1000, 'command_get_net': 0, 'command_get_tare': 0, 'command_get_gross': 0, 'command_set_zero': 0, 'command_set_tare': 0 },
+            { 'id': 3, 'tittle': '582', 'description': '', 'port': 0, 'filter_value': 0, 'filter_net': 5, 'filter_tare': 6, 'filter_gross': 7, 'filter_unit': 0, 'filter_unstable': 0, 'command_get_interval': 1000, 'command_get_net': 0, 'command_get_tare': 0, 'command_get_gross': 0, 'command_set_zero': 0, 'command_set_tare': 0 }
         ]
 };
 var data = {};
@@ -55,6 +63,29 @@ app.set('port', 3000);
 // -> Los datos recibidos son convertimos en objetos de javascript
 //app.use(express.urlencoded({ extended: true }));
 //app.use(express.json());
+
+app.get('/reporte/fbus', function (req, res) {
+    
+    let {id, rx} = req.query;
+    
+
+    if(id != 544){
+        console.log(req.connection.remoteAddress.split(':').pop());
+        console.log(Math.floor(new Date().getTime() / 1000.0));
+        //console.log(decodeURI(rx));
+
+        //console.log("data : "+JSON.stringify({id,decodeURI(rx)}));
+        const buff = Buffer.from(rx, "utf-8");
+        console.log(buff.toString());
+        console.log(buff.toString('hex'));
+    }
+    /*
+    else{
+    
+    const buff = Buffer.from(rx, "utf-8");
+    console.log(buff.toString('hex'));
+    }*/
+});
 
 app.get('/captura/fbus', function (req, res) {
     //console.log(req.body);

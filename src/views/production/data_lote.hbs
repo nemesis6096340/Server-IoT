@@ -9,6 +9,118 @@
 <script src="https://unpkg.com/bootstrap-table@1.19.1/dist/bootstrap-table.min.js"></script>
 <script src="https://unpkg.com/bootstrap-table@1.19.1/dist/extensions/export/bootstrap-table-export.min.js"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+
+<script>
+
+    var produccion = {};
+    produccion.datos = {{{json produccion_datos}}};
+    produccion.hora = {{{json produccion_hora}}};
+    produccion.turno = {{{json produccion_turno}}};
+    produccion.eventos = {{{json produccion_eventos}}};
+    produccion.paradas = {{{json produccion_paradas}}};
+    produccion.tiempos = {{{json produccion_tiempos}}};
+
+    console.log(produccion.tiempos);
+
+    var paradas = [];
+    var hora_anterior = moment(produccion.datos.hini, 'DD/MM/YYYY hh:00:00');
+    var evento_anterior = 'SIN PRODUCCION';
+    var segundos_produciendo = 0;
+    var segundos_detenido = 0;    
+    var segundos_ajustando = 0;
+
+    var hini = moment(produccion.datos.hini, 'DD/MM/YYYY hh:mm:ss');
+    var hfin = moment(produccion.datos.hfin, 'DD/MM/YYYY hh:mm:ss');
+
+    console.log(moment.utc(hfin.diff(hini, 'seconds') * 1000).format('HH:mm:ss'));
+
+    var segundos_produciendo_hora = 0;
+    var segundos_detenido_hora = 0;    
+    var segundos_ajustando_hora = 0;
+
+    var hora_lap = moment(produccion.datos.hini, 'DD/MM/YYYY hh:00:00');
+    
+    /*for(let i = 0;i < produccion.eventos.length -1;i++){
+        let hora_evento = moment(produccion.eventos[i].hreg,'DD/MM/YYYY hh:mm:ss');
+        let hora_proximo = moment(produccion.eventos[i+1].hreg,'DD/MM/YYYY hh:mm:ss');
+        let duration = hora_proximo.diff(hora_evento, 'seconds');
+        paradas.push({'hreg': hora_evento, 'state':produccion.eventos[i].state, 'duration': moment.utc(duration*1000).format('HH:mm:ss')});
+    }*/
+
+console.log(paradas);
+
+    for(let i = 0;i < produccion.eventos.length;i++){
+        let hora_evento = moment(produccion.eventos[i].hreg,'DD/MM/YYYY hh:mm:ss');        
+        switch(produccion.eventos[i].state){
+            case 'INICIA PRODUCCION':
+                switch (evento_anterior){
+                    case 'SIN PRODUCCION':
+                    break;
+                }                
+                hora_anterior = hora_evento;
+                evento_anterior = produccion.eventos[i].state;
+                break;
+            case 'PRODUCIENDO':
+                switch (evento_anterior){
+                    case 'INICIA PRODUCCION':
+                    case 'PRODUCCION DETENIDA':
+                        segundos_detenido += hora_evento.diff(hora_anterior, 'seconds');
+                    break;
+                }
+                hora_anterior = hora_evento;
+                evento_anterior = produccion.eventos[i].state;
+            break;
+            case 'PRODUCCION DETENIDA':
+                switch (evento_anterior){
+                    case 'PRODUCIENDO':
+                        segundos_produciendo += hora_evento.diff(hora_anterior, 'seconds');
+                    break;
+                    case 'AJUSTANDO MAQUINA':
+                        segundos_ajustando += hora_evento.diff(hora_anterior, 'seconds');
+                    break;
+                }
+                hora_anterior = hora_evento;
+                evento_anterior = produccion.eventos[i].state;
+            break;
+            case 'AJUSTANDO MAQUINA':
+                switch (evento_anterior){
+                    case 'PRODUCIENDO':
+                        segundos_produciendo += hora_evento.diff(hora_anterior, 'seconds');
+                    break;
+                    case 'PRODUCCION DETENIDA':
+                        segundos_detenido += hora_evento.diff(hora_anterior, 'seconds');
+                    break;
+                }
+                hora_anterior = hora_evento;
+                evento_anterior = produccion.eventos[i].state;
+            case 'FINALIZO PRODUCCION':
+                switch (evento_anterior){
+                    case 'PRODUCIENDO':
+                        segundos_produciendo += hora_evento.diff(hora_anterior, 'seconds');
+                    break;
+                    case 'PRODUCCION DETENIDA':
+                        segundos_detenido += hora_evento.diff(hora_anterior, 'seconds');
+                    break;
+                }
+                hora_anterior = hora_evento;
+                evento_anterior = produccion.eventos[i].state;
+            break;
+        }
+        
+    }
+
+    
+    console.log(moment.utc(segundos_detenido*1000).format('HH:mm:ss'));
+    console.log(moment.utc(segundos_produciendo*1000).format('HH:mm:ss'));
+    console.log(moment.utc(segundos_ajustando*1000).format('HH:mm:ss'));
+    console.log(moment.utc((segundos_detenido+segundos_produciendo+segundos_ajustando)*1000).format('HH:mm:ss'));
+
+
+    
+
+</script>
+
 <ul class="breadcrumb">
     <span><i class="fa fa-industry mx-2"></i></span>
     <li class="breadcrumb-item">
@@ -26,6 +138,8 @@
     </li>
 </ul>
 <div class="container">
+
+    <h4 class="text-center">DATOS DE PRODUCCION</h4>
     <table class="table table-sm">
         <thead>
             <tr>            
@@ -48,6 +162,7 @@
             <th scope="row">TOTAL PRODUCIDO :</th>
             <td>{{produccion_datos.total_producido}}</td>            
         </tr> 
+
         </tbody>
     </table>
 
@@ -80,9 +195,6 @@
         </tbody>        
     </table>
 
-
-
-
     <h4 class="text-center">PRODUCCION TURNO</h4>
     <table id="tblLote" class="table table-sm">
         <thead>
@@ -101,7 +213,7 @@
         </tbody>        
     </table>
 
-    <h4 class="text-center">PRODUCCION EVENTOS</h4>
+    <!--h4 class="text-center">PRODUCCION EVENTOS</h4>
     <table id="tblLote" class="table table-sm">
         <thead>
             <tr>
@@ -119,7 +231,81 @@
             </tr>
             {{/each}}     
         </tbody>
+    </table-->
+
+    <h4 class="text-center">PRODUCCION EVENTOS</h4>
+    <table id="tblLote" class="table table-sm">
+        <thead>
+            <tr>
+            <th scope="col">HORA REGISTRO</th>            
+            <th scope="col">ESTADO PRODUCCION</th>
+            <th scope="col">TOTAL PRODUCIDO</th>
+            <th scope="col">DURACION</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each produccion_paradas}}
+            <tr>
+                <th scope="row">{{hreg}}</th>
+                <td>{{state}}</td>
+                <td>{{total}}</td>
+                <td>{{duration}}</td>
+                
+            </tr>
+            {{/each}}     
+        </tbody>
     </table>
     
+    <h4 class="text-center">TIEMPOS DE PRODUCCION</h4>
+    <table class="table table-sm">
+        <thead>
+            <tr>
+            </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th scope="row">TIEMPO TOTAL :</th>
+            <td>{{produccion_tiempos.total}}</td>            
+        </tr>
+        <tr>
+            <th scope="row">TIEMPO TOTAL PRODUCIENDO :</th>
+            <td>{{produccion_tiempos.produciendo}}</td>            
+        </tr>
+        <tr>
+            <th scope="row">TIEMPO TOTAL DETENIDO :</th>
+            <td>{{produccion_tiempos.detenido}}</td>            
+        </tr>
+        <tr>
+            <th scope="row">TIEMPO TOTAL AJUSTE :</th>
+            <td>{{produccion_tiempos.ajustando}}</td>            
+        </tr>
+
+        </tbody>
+    </table>
+
 </div>
 
+<!--div class="container">
+    <div class="row mb-1">
+        <div class="col-sm bg-warning text-center">
+            <h4>TIEMPO TOTAL</h4>
+        </div>
+    </div>
+    <div class="row mb-1">
+        <div class="col-sm-10 bg-warning text-center p-auto">
+            <h4>TIEMPO PLANEADO DE OPERACION</h4>
+        </div>
+        <div class="col-sm-2 bg-info text-center">
+            <h7>TIEMPO PLANEADO DE NO OPERACION</h7>
+        </div>
+    </div>
+
+    <div class="row mb-1">
+        <div class="col-sm-10 bg-warning text-center p-auto">
+            <h4>TIEMPO PLANEADO DE OPERACION</h4>
+        </div>
+        <div class="col-sm-2 bg-info text-center">
+            <h7>TIEMPO PLANEADO DE NO OPERACION</h7>
+        </div>
+    </div>
+</div-->

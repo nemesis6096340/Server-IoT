@@ -251,7 +251,7 @@ controlCtrl.data_lote = async function (req, res) {
     const result_datos = await pool.query("call db_ControldeProduccion_V4.MostrarProduccion(?);", [id]);
     let produccion_datos = JSON.parse(JSON.stringify(result_datos[0][0]));
 
-    console.log(produccion_datos);
+    //console.log(produccion_datos);
 
     const result_hora = await pool.query("call db_ControldeProduccion_V4.ListarProduccionHora(?);", [id]);
     let produccion_hora = JSON.parse(JSON.stringify(result_hora[0]));
@@ -260,9 +260,46 @@ controlCtrl.data_lote = async function (req, res) {
     let produccion_turno = JSON.parse(JSON.stringify(result_turno[0]));
 
     const result_eventos = await pool.query("call db_ControldeProduccion_V4.ListarProduccionEventos(?);", [id]);
-    let produccion_eventos = JSON.parse(JSON.stringify(result_eventos[0]));
+    let produccion_eventos = JSON.parse(JSON.stringify(result_eventos[0]));    
+    
+    let produccion_paradas = [];
+    let produccion_tiempos = {};
 
-    res.render('production/data_lote.hbs', { produccion_datos, produccion_hora, produccion_turno, produccion_eventos, navigate });
+    produccion_tiempos.total  = (moment(produccion_datos.hfin,'DD/MM/YYYY hh:mm:ss')).diff((moment(produccion_datos.hini,'DD/MM/YYYY hh:mm:ss')), 'seconds');
+    produccion_tiempos.produciendo = 0;
+    produccion_tiempos.detenido = 0;    
+    produccion_tiempos.ajustando = 0;
+
+    for(let i = 0;i < produccion_eventos.length -1 ;i++){
+        let hora_evento = moment(produccion_eventos[i].hreg,'DD/MM/YYYY hh:mm:ss');
+        let hora_proximo = moment(produccion_eventos[i+1].hreg,'DD/MM/YYYY hh:mm:ss');
+        let duration = hora_proximo.diff(hora_evento, 'seconds');
+
+        switch(produccion_eventos[i].state){
+            case 'INICIA PRODUCCION':
+                produccion_tiempos.detenido += duration;
+                break;
+            case 'PRODUCIENDO':
+                produccion_tiempos.produciendo += duration;
+            break;
+            case 'PRODUCCION DETENIDA':
+                produccion_tiempos.detenido += duration;
+            break;
+            case 'AJUSTANDO MAQUINA':
+                produccion_tiempos.ajustando += duration;
+            case 'FINALIZO PRODUCCION':
+                produccion_tiempos.detenido += duration;
+            break;
+        }
+        
+        produccion_paradas.push({'hreg': `${produccion_eventos[i].hreg}`, 'state':produccion_eventos[i].state, 'duration': moment.utc(duration*1000).format('HH:mm:ss') ,'total': produccion_eventos[i+1].total - produccion_eventos[i].total });
+    }
+    produccion_tiempos.total = moment.utc(produccion_tiempos.total*1000).format('HH:mm:ss');
+    produccion_tiempos.produciendo = moment.utc(produccion_tiempos.produciendo*1000).format('HH:mm:ss');
+    produccion_tiempos.detenido = moment.utc(produccion_tiempos.detenido*1000).format('HH:mm:ss');
+    produccion_tiempos.ajustando = moment.utc(produccion_tiempos.ajustando*1000).format('HH:mm:ss');
+
+    res.render('production/data_lote.hbs', { produccion_datos, produccion_hora, produccion_turno, produccion_eventos, produccion_paradas , produccion_tiempos, navigate });
 };
 
 /*

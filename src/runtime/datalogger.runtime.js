@@ -49,7 +49,7 @@ class DataloggerRuntime{
     connect(){
         // clear pending timeouts
         clearTimeout(this.timeoutConnectRef);
-
+        
         // if client already open, just run
         if (this.client.isOpen) {
             console.log("Client open");
@@ -72,7 +72,7 @@ class DataloggerRuntime{
         // set the client's unit id
         // set a timout for requests default is null (no timeout)
         this.client.setID(this.id);
-        this.client.setTimeout(1000);
+        this.client.setTimeout(5000);
         console.log("Set Client");
         // run program
         this.run();
@@ -81,30 +81,38 @@ class DataloggerRuntime{
     run() {
         // clear pending timeouts
         clearTimeout(this.timeoutRunRef);
-    
+        
         // read the 4 registers starting at address 5
         this.client.readInputRegisters(ADDRESS_MODBUS_DATALOGGER, 16)
-            .then(function(d) {
-                console.log(new Date().toISOString(), "Receive:", d.data);
-                console.log(this.index);
+            .then(function(d) {              
                 register_data(this.index, d.data);
             }.bind(this))
             .then(function() {
                 this.timeoutRunRef = setTimeout(this.run.bind(this), 1000);
             }.bind(this))
             .catch(function(e) {
+                console.log(e.message);
+                let current_time = Math.floor(new Date().getTime() / 1000.0);                
+                let file_path = `./logs/THM/${devices[this.index].device.id}`;
+                if (!fs.existsSync(file_path)) {
+                    fs.mkdirSync(file_path, { recursive: true });
+                }
+                let file_name = moment(new Date(current_time * 1000)).format('YYYYMMDD');
+                fs.appendFile(`${file_path}/${file_name}.log`, `${moment(new Date(current_time * 1000)).format('YYYY-MM-DD hh:mm:ss ')} ${e.errno} : ${e.message}\n`, function (err) {
+                    if (err) return console.log(err);
+                });
                 this.checkError(e);
-                console.log(new Date().toISOString(), e.message); 
+                //console.log(new Date().toISOString(), e.message);
             }.bind(this));
     };
 
     checkError(e) {
         if(e.errno && networkErrors.includes(e.errno)) {
             console.log(new Date().toISOString(), "we have to reconnect");
-    
+            
             // close port
             this.client.close();
-    
+            
             // re open client
             this.client = new ModbusRTU();
             this.timeoutConnectRef = setTimeout(this.connect.bind(this), 0);
@@ -147,7 +155,10 @@ devices.forEach(async (device, index)=> {
 
 function register_data(index, data){
     if(Number.isInteger(index) && Array.isArray(data)){
-        console.log(JSON.stringify(data));
+        //console.log(new Date().toISOString());
+        //console.log(devices[index].device.id);
+        //console.log(JSON.stringify(data));
+        console.log(`${devices[index].device.id} - ${JSON.stringify(data)}`);        
         for (let i = 0; i < data.length; i += 2) {
             let current_time = Math.floor(new Date().getTime() / 1000.0);
             let measurement = {};
@@ -300,7 +311,7 @@ const runtime_minute = schedule.scheduleJob("*/1 * * * *", async function () {
             if ((Math.abs(sensor.data.time - current_time) < 5)) {
                 if (moment(new Date(sensor.data.time * 1000)).format('YYYYMMDD') != moment(new Date(current_time * 1000)).format('YYYYMMDD')) {
                     sensor.data.hmax = sensor.data.hmin = sensor.data.humd;
-                    sensor.data.tmax = sensor.data.tmin = sensor.data.humd;
+                    sensor.data.tmax = sensor.data.tmin = sensor.data.temp;
                 }
                 sensor.data.time = current_time;
                 //sensor.data.code = sensor.code;

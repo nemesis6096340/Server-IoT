@@ -1,6 +1,6 @@
 import ModbusRTU from "modbus-serial";
 
-const ADDRESS_MODBUS_DATALOGGER = 300;
+const ADDRESS_MODBUS_DATALOGGER = 610;
 
 var networkErrors = [
     "ESOCKETTIMEDOUT",
@@ -104,5 +104,5 @@ class modbus_client{
 };
 
 
-//var client1 = new modbus_client(1,'10.0.1.98',123);
-//client1.connect();
+var client1 = new modbus_client(1,'10.0.1.98',123);
+client1.connect();
